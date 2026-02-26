@@ -11,4 +11,24 @@ public partial class MessageBoxDialog : Page
     {
         InitializeComponent();
     }
+
+    private void btnOpslaan_Click(object sender, RoutedEventArgs e)
+    {
+        MessageBoxResult result = MessageBox.Show(
+            "Wil je de gegevens opslaan?",
+            "Opslaan",                      
+            MessageBoxButton.YesNo,         
+            MessageBoxImage.Question        
+        );
+
+        if (result == MessageBoxResult.Yes)
+        {
+            MessageBox.Show(
+                "De gegevens zijn opgeslagen.",
+                "Opgeslagen",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
+        }
+    }
 }

@@ -15,33 +15,44 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Frame x:Name="fraAssignment" Grid.Row="0" Grid.Column="0" Background="#eeeeee" />
-        <!-- TODO: PAS HIERONDER DE XAML AAN -->
+
         <Grid Background="Beige" Grid.Row="1" Margin="20">
-            <Button Content="Button 1" Padding="3" Background="#FAF089"/>
-            <Button Content="Button 2" Padding="3" Background="#89FAF0"/>
-            <TextBlock FontSize="10" Padding="8,3" Background="#FA89F0">Voetnoot</TextBlock>
+            <Button Content="Button 1" Padding="3" Background="#FAF089" 
+                    HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="20"/>
+
+            <Button Content="Button 2" Padding="3" Background="#89FAF0" 
+                    HorizontalAlignment="Center" VerticalAlignment="Stretch" Margin="10"/>
+
+            <TextBlock FontSize="10" Padding="8,3" Background="#FA89F0" 
+                       Width="200" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="40,0,0,10">Voetnoot</TextBlock>
         </Grid>
+
         <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="20" Background="#FFDDEEFF">
+
             <StackPanel Background="#FFC9E4FF" Width="150" Margin="10">
                 <Button Content="🏠 Home" Padding="3" Margin="20,10,20,0" Background="#FAF089"/>
                 <Button Content="🏭 Products" Padding="3" Margin="20,10,20,0" Background="#FAF089"/>
                 <Button Content="❔ About" Padding="3" Margin="20,10,20,0" Background="#FAF089"/>
             </StackPanel>
+
             <StackPanel Background="#FFC9E4FF" Width="150" Margin="10">
-                <Button Content="🏠 Home" Padding="3" Margin="20,10,20,0" Background="#FAF089"/>
-                <Button Content="🏭 Products" Padding="3" Margin="20,10,20,0" Background="#FAF089"/>
-                <Button Content="❔ About" Padding="3" Margin="20,10,20,0" Background="#FAF089"/>
+                <Button Content="🏠 Home" Padding="3" Margin="20,10,20,0" Background="#FAF089" HorizontalAlignment="Left"/>
+                <Button Content="🏭 Products" Padding="3" Margin="20,10,20,0" Background="#FAF089" HorizontalAlignment="Left"/>
+                <Button Content="❔ About" Padding="3" Margin="20,10,20,0" Background="#FAF089" HorizontalAlignment="Left"/>
             </StackPanel>
+
             <StackPanel Background="#FFC9E4FF" Width="150" Margin="10">
-                <Button Content="🏠 Home" Padding="3" Margin="20,10,20,0" Background="#FAF089"/>
-                <Button Content="🏭 Products" Padding="3" Margin="20,10,20,0" Background="#FAF089"/>
-                <Button Content="❔ About" Padding="3" Margin="20,10,20,0" Background="#FAF089"/>
+                <Button Content="🏠 Home" Padding="3" Margin="20,10,20,0" Background="#FAF089" HorizontalAlignment="Center"/>
+                <Button Content="🏭 Products" Padding="3" Margin="20,10,20,0" Background="#FAF089" HorizontalAlignment="Center"/>
+                <Button Content="❔ About" Padding="3" Margin="20,10,20,0" Background="#FAF089" HorizontalAlignment="Center"/>
             </StackPanel>
+
             <StackPanel Background="#FFC9E4FF" Width="150" Margin="10">
-                <Button Content="🏠 Home" Padding="3" Margin="20,10,20,0" Background="#FAF089"/>
-                <Button Content="🏭 Products" Padding="3" Margin="20,10,20,0" Background="#FAF089"/>
-                <Button Content="❔ About" Padding="3" Margin="20,10,20,0" Background="#FAF089"/>
+                <Button Content="🏠 Home" Padding="3" Margin="0,10,10,0" Background="#FAF089" Width="80" HorizontalAlignment="Right"/>
+                <Button Content="🏭 Products" Padding="3" Margin="0,10,10,0" Background="#FAF089" Width="80" HorizontalAlignment="Right"/>
+                <Button Content="❔ About" Padding="3" Margin="0,10,10,0" Background="#FAF089" Width="80" HorizontalAlignment="Right"/>
             </StackPanel>
+
         </StackPanel>
     </Grid>
 </Page>

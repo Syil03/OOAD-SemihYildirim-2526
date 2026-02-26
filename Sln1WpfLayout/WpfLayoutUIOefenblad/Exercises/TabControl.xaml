@@ -15,7 +15,50 @@
         </Grid.RowDefinitions>
         <Frame x:Name="fraAssignment" Grid.Row="0" Grid.Column="0" Background="#eeeeee" />
         <Border Background="#EEFDEF" BorderBrush="#6B6CB0" BorderThickness="1" Padding="12" Margin="20" Grid.Row="1">
-            <!-- TODO: PAS HIERONDER DE XAML AAN -->
+
+            <TabControl Background="White">
+
+                <TabItem Header="Account">
+                    <Grid Margin="20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Label Grid.Row="0" Grid.Column="0" Content="E-mail:" Margin="0,0,20,15" VerticalContentAlignment="Center"/>
+                        <TextBox Grid.Row="0" Grid.Column="1" Margin="0,0,0,15" Height="30" VerticalContentAlignment="Center"/>
+
+                        <Label Grid.Row="1" Grid.Column="0" Content="Wachtwoord:" Margin="0,0,20,15" VerticalContentAlignment="Center"/>
+                        <PasswordBox Grid.Row="1" Grid.Column="1" Margin="0,0,0,15" Height="30" VerticalContentAlignment="Center"/>
+
+                        <Button Grid.Row="2" Grid.Column="1" Content="Wijzigen" HorizontalAlignment="Right" Padding="15,5" Margin="0,5,0,0"/>
+                    </Grid>
+                </TabItem>
+
+                <TabItem Header="Voorkeuren">
+                    <StackPanel Margin="20">
+                        <CheckBox Content="Nieuwsbrief ontvangen" Margin="0,0,0,10"/>
+                        <CheckBox Content="Donkere modus gebruiken" Margin="0,0,0,10"/>
+                        <CheckBox Content="Notificaties aanzetten" Margin="0,0,0,10"/>
+                    </StackPanel>
+                </TabItem>
+
+                <TabItem Header="Over">
+                    <TextBlock Margin="20">
+                        <Run FontWeight="Bold">Applicatie Info</Run>
+                        <LineBreak/>
+                        <LineBreak/>
+                        Dit is een oefening om te leren werken met een TabControl, Grids en StackPanels.
+                    </TextBlock>
+                </TabItem>
+
+            </TabControl>
+
         </Border>
     </Grid>
 </Page>

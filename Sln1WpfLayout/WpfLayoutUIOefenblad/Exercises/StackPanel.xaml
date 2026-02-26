@@ -15,7 +15,26 @@
         </Grid.RowDefinitions>
         <Frame x:Name="fraAssignment" Grid.Row="0" Grid.Column="0" Background="#eeeeee" />
         <Border Background="#EEEFFD" BorderBrush="#6B6CB0" BorderThickness="1" Padding="12" Margin="20" Grid.Row="1">
-            <!-- TODO: PAS HIERONDER DE XAML AAN -->
+
+            <Grid MaxWidth="500" HorizontalAlignment="Left">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <Label Content="Postcode:" FontWeight="Bold" Margin="0,0,0,10" Padding="5,0"/>
+                    <TextBox Text="5330" BorderBrush="LightBlue" Height="30" VerticalContentAlignment="Center" Padding="5,0"/>
+                    <TextBlock Text="b.v. 1234" Foreground="#666" FontStyle="Italic" FontSize="10" TextAlignment="Right" Padding="5"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Margin="20,0,0,0">
+                    <Label Content="Gemeente:" FontWeight="Bold" Margin="0,0,0,10" Padding="5,0"/>
+                    <TextBox Text="Poilvache" BorderBrush="LightBlue" Height="30" VerticalContentAlignment="Center" Padding="5,0"/>
+                    <TextBlock Text="b.v. Lier" Foreground="#666" FontStyle="Italic" FontSize="10" TextAlignment="Right" Padding="5"/>
+                </StackPanel>
+            </Grid>
+
         </Border>
     </Grid>
 </Page>
