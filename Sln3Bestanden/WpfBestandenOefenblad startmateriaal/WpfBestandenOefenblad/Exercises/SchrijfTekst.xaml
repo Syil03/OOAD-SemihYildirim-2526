@@ -1,0 +1,32 @@
+<Page x:Class="WpfBestandenOefenblad.Exercises.SchrijfTekst"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:WpfBestandenOefenblad.Exercises"
+      mc:Ignorable="d"
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="SchrijfTekst">
+
+    <Grid Background="#eeeeee">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="280"/>
+        </Grid.RowDefinitions>
+        <Frame x:Name="fraAssignment" Grid.Row="0" Grid.Column="0" />
+        <Border Background="White" Grid.Row="1">
+
+            <StackPanel Background="#e6f2ff" Margin="10">
+                <Label Content="Tekst:" Margin="10,10,10,0" FontWeight="Bold"/>
+
+                <TextBox x:Name="txtInvoer" Margin="10" Height="120" 
+                         AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+
+                <Button x:Name="btnOpslaan" Content="Opslaan..." 
+                        HorizontalAlignment="Left" Padding="15,5" Margin="10" 
+                        Click="BtnOpslaan_Click"/>
+            </StackPanel>
+
+        </Border>
+    </Grid>
+</Page>
