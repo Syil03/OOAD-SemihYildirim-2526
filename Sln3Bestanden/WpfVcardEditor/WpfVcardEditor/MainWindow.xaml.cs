@@ -47,6 +47,7 @@ namespace WpfVcardEditor
             }
         }
 
+        //AI als verbetering gebruikt, voor hulp gebruikt//
         private void Open_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog dlg = new OpenFileDialog();
@@ -408,6 +409,8 @@ namespace WpfVcardEditor
             UpdatePercentage();
         }
 
+
+        //AI gebruikt//
         private void LoadPhotoFromBase64(string base64)
         {
             if (string.IsNullOrWhiteSpace(base64))
