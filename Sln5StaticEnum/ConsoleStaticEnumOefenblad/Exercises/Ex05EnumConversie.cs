@@ -22,13 +22,13 @@ internal class Ex05EnumConversie
 
         // Testcode (haal uit commentaar):
 
-        //Prioriteit p1 = Prioriteit.Hoog;
-        //Console.WriteLine($"Enumwaarde: {p1}");
+        Prioriteit p1 = Prioriteit.Hoog;
+        Console.WriteLine($"Enumwaarde: {p1}");
 
-        //int cijfer = (int)p1;
-        //Console.WriteLine($"Als int: {cijfer}");
+        int cijfer = (int)p1;
+        Console.WriteLine($"Als int: {cijfer}");
 
-        //Prioriteit p2 = p1 + 1;
-        //Console.WriteLine($"Nog hogere prioriteit: {p2}");
+        Prioriteit p2 = p1 + 1;
+        Console.WriteLine($"Nog hogere prioriteit: {p2}");
     }
 }
