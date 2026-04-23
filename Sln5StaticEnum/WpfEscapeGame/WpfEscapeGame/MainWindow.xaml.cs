@@ -21,77 +21,43 @@ namespace WpfEscapeGame
         {
             InitializeComponent();
 
-            Room room1 = new Room()
-            {
-                Name = "bedroom",
-                Description = "I seem to be in a medium sized bedroom. " +
-                              "There is a locker to the left, a nice rug on the floor, " +
-                              "and a bed to the right."
-            };
+            Room room1 = new Room("bedroom",
+                "I seem to be in a medium sized bedroom. " +
+                "There is a locker to the left, a nice rug on the floor, " +
+                "and a bed to the right.");
             room1.Image = "ss-bedroom.png";
 
-            Room room2 = new Room()
-            {
-                Name = "living room",
-                Description = "A cozy living room. There's a clock on the wall and a plant in the corner."
-            };
+            Room room2 = new Room("living room",
+                "A cozy living room. There's a clock on the wall and a plant in the corner.");
             room2.Image = "ss-living.png";
 
-            Room room3 = new Room()
-            {
-                Name = "computer room",
-                Description = "A dark room with an old computer and a Commodore flag on the wall."
-            };
+            Room room3 = new Room("computer room",
+                "A dark room with an old computer and a Commodore flag on the wall.");
             room3.Image = "ss-computer.png";
 
-            Item key1 = new Item()
-            {
-                Name = "small silver key",
-                Description = "A small silver key, makes me think of one I had at highschool."
-            };
+            Item key1 = new Item("small silver key",
+                "A small silver key, makes me think of one I had at highschool.");
 
-            Item key2 = new Item()
-            {
-                Name = "large key",
-                Description = "A large key. Could this be my way out?"
-            };
+            Item key2 = new Item("large key",
+                "A large key. Could this be my way out?");
 
-            Item bed = new Item()
-            {
-                Name = "bed",
-                Description = "Just a bed. I am not tired now."
-            };
+            Item bed = new Item("bed", "Just a bed. I am not tired now.");
             bed.HiddenItem = key1;
             bed.IsPortable = false;
 
-            Item locker = new Item()
-            {
-                Name = "locker",
-                Description = "A locker. I wonder what's inside."
-            };
+            Item locker = new Item("locker", "A locker. I wonder what's inside.");
             locker.IsLocked = true;
             locker.Key = key1;
             locker.HiddenItem = key2;
             locker.IsPortable = false;
 
-            Item floorMat = new Item()
-            {
-                Name = "floor mat",
-                Description = "A bit ragged floor mat, but still one of the most popular designs."
-            };
+            Item floorMat = new Item("floor mat",
+                "A bit ragged floor mat, but still one of the most popular designs.");
 
-            Item chair = new Item()
-            {
-                Name = "chair",
-                Description = "A wooden chair. Nothing special about it."
-            };
+            Item chair = new Item("chair", "A wooden chair. Nothing special about it.");
             chair.IsPortable = false;
 
-            Item poster = new Item()
-            {
-                Name = "poster",
-                Description = "A poster of a woman on the beach. Nice!"
-            };
+            Item poster = new Item("poster", "A poster of a woman on the beach. Nice!");
 
             room1.Items.Add(floorMat);
             room1.Items.Add(bed);
@@ -99,44 +65,25 @@ namespace WpfEscapeGame
             room1.Items.Add(chair);
             room1.Items.Add(poster);
 
-            room2.Items.Add(new Item() { Name = "clock", Description = "A wall clock. It reads 7 o'clock." });
-            room2.Items.Add(new Item() { Name = "plant", Description = "A green tropical plant." });
+            room2.Items.Add(new Item("clock", "A wall clock. It reads 7 o'clock."));
+            room2.Items.Add(new Item("plant", "A green tropical plant."));
 
-            room3.Items.Add(new Item() { Name = "computer", Description = "An old Commodore 64. Classic!" });
-            room3.Items.Add(new Item() { Name = "trash bin", Description = "An empty trash bin." });
+            room3.Items.Add(new Item("computer", "An old Commodore 64. Classic!"));
+            room3.Items.Add(new Item("trash bin", "An empty trash bin."));
 
-            Door door1 = new Door()
-            {
-                Name = "green door",
-                Description = "A green door leading to the living room.",
-                IsLocked = true,
-                Key = key2,
-                ToRoom = room2
-            };
+            Door door1 = new Door("green door", "A green door leading to the living room.");
+            door1.IsLocked = true;
+            door1.Key = key2;
+            door1.ToRoom = room2;
 
-            Door door2 = new Door()
-            {
-                Name = "left door",
-                Description = "An open door to the computer room.",
-                IsLocked = false,
-                ToRoom = room3
-            };
+            Door door2 = new Door("left door", "An open door to the computer room.");
+            door2.ToRoom = room3;
 
-            Door door3 = new Door()
-            {
-                Name = "right door",
-                Description = "The door back to the living room.",
-                IsLocked = false,
-                ToRoom = room2
-            };
+            Door door3 = new Door("right door", "The door back to the living room.");
+            door3.ToRoom = room2;
 
-            Door door4 = new Door()
-            {
-                Name = "exit door",
-                Description = "The exit door. It's locked tight.",
-                IsLocked = true,
-                ToRoom = null
-            };
+            Door door4 = new Door("exit door", "The exit door. It's locked tight.");
+            door4.IsLocked = true;
 
             room1.Doors.Add(door1);
             room2.Doors.Add(door2);
@@ -227,7 +174,7 @@ namespace WpfEscapeGame
             if (roomItem.Key != myItem)
             {
                 txtMessage.Text = RandomMessageGenerator.GetRandomMessage(MessageType.Fail);
-                return; // ✅ return was hier vergeten!
+                return;
             }
 
             roomItem.IsLocked = false;

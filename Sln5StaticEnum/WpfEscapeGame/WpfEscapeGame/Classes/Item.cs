@@ -4,19 +4,15 @@ using System.Text;
 
 namespace WpfEscapeGame.Classes
 {
-    public class Item
+    public class Item : Actor
     {
-        public string Name { get; set; }
-        public string Description { get; set; }
         public bool IsLocked { get; set; } = false;
+        public bool IsPortable { get; set; } = true;
         public Item? Key { get; set; }
         public Item? HiddenItem { get; set; }
 
-        public override string ToString()
+        public Item(string name, string desc) : base(name, desc)
         {
-            return Name ?? "";
         }
-
-        public bool IsPortable { get; set; } = true;
     }
 }
