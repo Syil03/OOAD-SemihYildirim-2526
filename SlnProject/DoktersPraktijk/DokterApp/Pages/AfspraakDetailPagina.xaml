@@ -1,0 +1,61 @@
+<Page x:Class="DokterApp.Pages.AfspraakDetailPagina"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Afspraakdetails"
+      Background="#F0F4F8">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Bovenbalk met terugknop -->
+        <Border Grid.Row="0" Background="#1565C0" Padding="20,14">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Content="← Terug" Click="BtnTerug_Click"
+                        Background="Transparent" Foreground="White"
+                        BorderBrush="White" BorderThickness="1"
+                        Padding="10,5" Cursor="Hand" Margin="0,0,20,0"/>
+                <TextBlock Text="Afspraakdetails" FontSize="20" FontWeight="Bold"
+                           Foreground="White" VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Detailkaart -->
+        <Border Grid.Row="1" Background="White" Margin="24" Padding="32" CornerRadius="8">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="16" ShadowDepth="2" Opacity="0.1"/>
+            </Border.Effect>
+            <StackPanel>
+                <!-- Datum en tijdstip -->
+                <TextBlock Text="DATUM EN TIJDSTIP" FontSize="11" FontWeight="SemiBold"
+                           Foreground="#90A4AE" Margin="0,0,0,4"/>
+                <TextBlock x:Name="TxtMoment" FontSize="22" FontWeight="Bold"
+                           Foreground="#1565C0" Margin="0,0,0,28"/>
+
+                <!-- Patiënt -->
+                <TextBlock Text="PATIËNT" FontSize="11" FontWeight="SemiBold"
+                           Foreground="#90A4AE" Margin="0,0,0,4"/>
+                <TextBlock x:Name="TxtPatientNaam" FontSize="16"
+                           Foreground="#212121" Margin="0,0,0,28"/>
+
+                <!-- Klacht -->
+                <TextBlock Text="KLACHT" FontSize="11" FontWeight="SemiBold"
+                           Foreground="#90A4AE" Margin="0,0,0,4"/>
+                <TextBlock x:Name="TxtKlacht" FontSize="14" TextWrapping="Wrap"
+                           Foreground="#37474F" LineHeight="22"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Actieknop en foutmelding -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="24,0,24,24">
+            <Button Content="Afspraak verwijderen" Padding="14,10"
+                    Background="#D32F2F" Foreground="White" BorderThickness="0"
+                    Cursor="Hand" Click="BtnVerwijderen_Click"/>
+            <TextBlock x:Name="TxtFout" Foreground="#D32F2F" FontSize="13"
+                       VerticalAlignment="Center" Margin="16,0,0,0"
+                       TextWrapping="Wrap" Visibility="Collapsed"/>
+        </StackPanel>
+    </Grid>
+</Page>
