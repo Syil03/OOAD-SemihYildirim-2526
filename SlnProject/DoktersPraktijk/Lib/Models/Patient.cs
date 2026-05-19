@@ -6,7 +6,7 @@ namespace DokterspraktijkLib.Models
     // Klasse die een patiënt in de praktijk vertegenwoordigt
     public class Patient : Persoon
     {
-        public string Geslacht { get; set; } = string.Empty;
+        public int Geslacht { get; set; }
         public DateTime Geboortedatum { get; set; }
         public Notificatie Notificaties { get; set; }
 
@@ -225,7 +225,8 @@ namespace DokterspraktijkLib.Models
             patient.Id = (int)lezer["id"];
             patient.Voornaam = (string)lezer["voornaam"];
             patient.Achternaam = (string)lezer["achternaam"];
-            patient.Geslacht = (string)lezer["geslacht"];
+            // geslacht is een int in de databank; rechtstreeks uitlezen met GetInt32
+            patient.Geslacht = lezer.GetInt32(lezer.GetOrdinal("geslacht"));
             patient.Gsm = (string)lezer["gsm"];
             patient.Email = (string)lezer["email"];
             patient.Paswoord = (string)lezer["paswoord"];

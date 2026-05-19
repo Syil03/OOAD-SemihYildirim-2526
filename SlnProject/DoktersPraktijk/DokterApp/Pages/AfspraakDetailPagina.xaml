@@ -11,7 +11,7 @@
         </Grid.RowDefinitions>
 
         <!-- Bovenbalk met terugknop -->
-        <Border Grid.Row="0" Background="#1565C0" Padding="20,14">
+        <Border Grid.Row="0" Background="#1B2A4A" Padding="20,14">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <Button Content="← Terug" Click="BtnTerug_Click"
                         Background="Transparent" Foreground="White"
@@ -23,30 +23,50 @@
         </Border>
 
         <!-- Detailkaart -->
-        <Border Grid.Row="1" Background="White" Margin="24" Padding="32" CornerRadius="8">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="16" ShadowDepth="2" Opacity="0.1"/>
-            </Border.Effect>
-            <StackPanel>
-                <!-- Datum en tijdstip -->
-                <TextBlock Text="DATUM EN TIJDSTIP" FontSize="11" FontWeight="SemiBold"
-                           Foreground="#90A4AE" Margin="0,0,0,4"/>
-                <TextBlock x:Name="TxtMoment" FontSize="22" FontWeight="Bold"
-                           Foreground="#1565C0" Margin="0,0,0,28"/>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Border Background="White" Margin="24" Padding="32" CornerRadius="8">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="16" ShadowDepth="2" Opacity="0.1"/>
+                </Border.Effect>
+                <StackPanel>
+                    <!-- Profielfoto van de patiënt (rond gemaakt via clip in code-behind) -->
+                    <Grid Width="120" Height="120" HorizontalAlignment="Center" Margin="0,0,0,14">
+                        <!-- Echte foto; standaard verborgen tot er een foto geladen is -->
+                        <Image x:Name="ImgPatientFoto" Width="120" Height="120"
+                               Stretch="UniformToFill" Visibility="Collapsed"/>
+                        <!-- Standaard grijze cirkel met initialen wanneer er geen foto is -->
+                        <Grid x:Name="PnlPlaceholder">
+                            <Ellipse Width="120" Height="120" Fill="#B0BEC5"/>
+                            <TextBlock x:Name="TxtInitialen" FontSize="40" FontWeight="Bold"
+                                       Foreground="White" HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+                    </Grid>
 
-                <!-- Patiënt -->
-                <TextBlock Text="PATIËNT" FontSize="11" FontWeight="SemiBold"
-                           Foreground="#90A4AE" Margin="0,0,0,4"/>
-                <TextBlock x:Name="TxtPatientNaam" FontSize="16"
-                           Foreground="#212121" Margin="0,0,0,28"/>
+                    <!-- Naam van de patiënt -->
+                    <TextBlock x:Name="TxtPatientNaam" FontSize="22" FontWeight="Bold"
+                               Foreground="#212121" HorizontalAlignment="Center" Margin="0,0,0,28"/>
 
-                <!-- Klacht -->
-                <TextBlock Text="KLACHT" FontSize="11" FontWeight="SemiBold"
-                           Foreground="#90A4AE" Margin="0,0,0,4"/>
-                <TextBlock x:Name="TxtKlacht" FontSize="14" TextWrapping="Wrap"
-                           Foreground="#37474F" LineHeight="22"/>
-            </StackPanel>
-        </Border>
+                    <!-- Datum en tijdstip -->
+                    <TextBlock Text="DATUM EN TIJDSTIP" FontSize="11" FontWeight="SemiBold"
+                               Foreground="#90A4AE" Margin="0,0,0,4"/>
+                    <TextBlock x:Name="TxtMoment" FontSize="18" FontWeight="Bold"
+                               Foreground="#1B2A4A" Margin="0,0,0,24"/>
+
+                    <!-- Geslacht -->
+                    <TextBlock Text="GESLACHT" FontSize="11" FontWeight="SemiBold"
+                               Foreground="#90A4AE" Margin="0,0,0,4"/>
+                    <TextBlock x:Name="TxtGeslacht" FontSize="16"
+                               Foreground="#212121" Margin="0,0,0,24"/>
+
+                    <!-- Klacht -->
+                    <TextBlock Text="KLACHT" FontSize="11" FontWeight="SemiBold"
+                               Foreground="#90A4AE" Margin="0,0,0,4"/>
+                    <TextBlock x:Name="TxtKlacht" FontSize="14" TextWrapping="Wrap"
+                               Foreground="#37474F" LineHeight="22"/>
+                </StackPanel>
+            </Border>
+        </ScrollViewer>
 
         <!-- Actieknop en foutmelding -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="24,0,24,24">

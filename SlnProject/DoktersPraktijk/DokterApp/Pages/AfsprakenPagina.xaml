@@ -4,40 +4,70 @@
       Title="Afspraken"
       Background="#F0F4F8">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="240"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-        <!-- Bovenbalk met naam van de dokter -->
-        <Border Grid.Row="0" Background="#1565C0" Padding="24,16">
+        <!-- Navy sidebar met branding en naam van de ingelogde dokter -->
+        <Border Grid.Column="0" Background="#1B2A4A">
             <StackPanel>
-                <TextBlock x:Name="TxtDokterNaam" FontSize="20" FontWeight="Bold" Foreground="White"/>
-                <TextBlock Text="Uw afspraken" FontSize="13" Foreground="#BBDEFB"/>
+                <!-- Branding -->
+                <TextBlock Text="Dokterspraktijk" FontSize="18" FontWeight="Bold"
+                           Foreground="White" Margin="24,28,24,2"/>
+                <TextBlock Text="Artsenportaal" FontSize="12" Foreground="#9FB0CC"
+                           Margin="24,0,24,28"/>
+
+                <!-- Ingelogde dokter -->
+                <Border Background="#243657" Padding="24,16">
+                    <StackPanel>
+                        <TextBlock Text="INGELOGD ALS" FontSize="10" FontWeight="SemiBold"
+                                   Foreground="#7F90AE" Margin="0,0,0,4"/>
+                        <TextBlock x:Name="TxtDokterNaam" FontSize="15" FontWeight="Bold"
+                                   Foreground="White" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </Border>
 
-        <!-- Filterrij -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="24,16,24,0">
-            <Button x:Name="BtnToekomstig" Content="Toekomstige afspraken"
-                    Padding="14,8" Margin="0,0,8,0" Cursor="Hand"
-                    Background="#1976D2" Foreground="White" BorderThickness="0"
-                    Click="BtnToekomstig_Click"/>
-            <Button x:Name="BtnAlle" Content="Alle afspraken"
-                    Padding="14,8" Cursor="Hand"
-                    Background="#ECEFF1" Foreground="#546E7A" BorderThickness="0"
-                    Click="BtnAlle_Click"/>
-        </StackPanel>
+        <!-- Hoofdgedeelte -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <!-- Afspraken (dynamisch gegenereerde kaarten) -->
-        <ScrollViewer Grid.Row="2" Margin="24,12,24,0" VerticalScrollBarVisibility="Auto">
-            <StackPanel x:Name="PnlAfspraken"/>
-        </ScrollViewer>
+            <!-- Donkere header -->
+            <Border Grid.Row="0" Background="#1B2A4A" Padding="28,20">
+                <StackPanel>
+                    <TextBlock Text="Uw afspraken" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="Overzicht van uw geplande consultaties" FontSize="13"
+                               Foreground="#9FB0CC"/>
+                </StackPanel>
+            </Border>
 
-        <!-- Foutmelding -->
-        <TextBlock x:Name="TxtFout" Grid.Row="3" Foreground="#D32F2F" FontSize="13"
-                   Margin="24,8,24,16" TextWrapping="Wrap" Visibility="Collapsed"/>
+            <!-- Filterrij -->
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="28,18,28,0">
+                <Button x:Name="BtnToekomstig" Content="Toekomstige afspraken"
+                        Padding="14,8" Margin="0,0,8,0" Cursor="Hand"
+                        Background="#1B2A4A" Foreground="White" BorderThickness="0"
+                        Click="BtnToekomstig_Click"/>
+                <Button x:Name="BtnAlle" Content="Alle afspraken"
+                        Padding="14,8" Cursor="Hand"
+                        Background="#ECEFF1" Foreground="#546E7A" BorderThickness="0"
+                        Click="BtnAlle_Click"/>
+            </StackPanel>
+
+            <!-- Afspraken (dynamisch gegenereerde kaarten) -->
+            <ScrollViewer Grid.Row="2" Margin="28,14,28,0" VerticalScrollBarVisibility="Auto">
+                <StackPanel x:Name="PnlAfspraken"/>
+            </ScrollViewer>
+
+            <!-- Foutmelding -->
+            <TextBlock x:Name="TxtFout" Grid.Row="3" Foreground="#D32F2F" FontSize="13"
+                       Margin="28,8,28,16" TextWrapping="Wrap" Visibility="Collapsed"/>
+        </Grid>
     </Grid>
 </Page>

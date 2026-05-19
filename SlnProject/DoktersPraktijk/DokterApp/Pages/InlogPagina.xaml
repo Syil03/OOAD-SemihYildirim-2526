@@ -4,40 +4,57 @@
       Title="Inloggen"
       Background="#F0F4F8">
     <Grid>
-        <!-- Gecentreerde inlogkaart -->
-        <Border Width="380" VerticalAlignment="Center" HorizontalAlignment="Center"
-                Background="White" CornerRadius="8" Padding="40,36,40,40">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="20" ShadowDepth="2" Opacity="0.15"/>
-            </Border.Effect>
-            <StackPanel>
-                <!-- Titel -->
-                <TextBlock Text="Dokterspraktijk" FontSize="26" FontWeight="Bold"
-                           Foreground="#1565C0" HorizontalAlignment="Center" Margin="0,0,0,4"/>
-                <TextBlock Text="Artsenportaal" FontSize="14" Foreground="#546E7A"
-                           HorizontalAlignment="Center" Margin="0,0,0,36"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
 
-                <!-- E-mail -->
-                <TextBlock Text="E-mailadres" FontSize="13" Foreground="#37474F" Margin="0,0,0,4"/>
-                <TextBox x:Name="TxtEmail" Height="40" Padding="10,0" FontSize="14"
-                         BorderBrush="#CFD8DC" BorderThickness="1" Margin="0,0,0,16"
-                         KeyDown="Invoer_KeyDown"/>
-
-                <!-- Wachtwoord -->
-                <TextBlock Text="Wachtwoord" FontSize="13" Foreground="#37474F" Margin="0,0,0,4"/>
-                <PasswordBox x:Name="TxtPaswoord" Height="40" Padding="10,0" FontSize="14"
-                             BorderBrush="#CFD8DC" BorderThickness="1" Margin="0,0,0,28"
-                             KeyDown="Invoer_KeyDown"/>
-
-                <!-- Inlogknop -->
-                <Button Content="Inloggen" Height="44" FontSize="15" FontWeight="SemiBold"
-                        Background="#1976D2" Foreground="White" BorderThickness="0"
-                        Cursor="Hand" Click="BtnInloggen_Click"/>
-
-                <!-- Foutmelding -->
-                <TextBlock x:Name="TxtFout" Foreground="#D32F2F" FontSize="13"
-                           TextWrapping="Wrap" Margin="0,16,0,0" Visibility="Collapsed"/>
+        <!-- Navy brandingpaneel links -->
+        <Border Grid.Column="0" Background="#1B2A4A">
+            <StackPanel VerticalAlignment="Center" Margin="48,0">
+                <TextBlock Text="Dokterspraktijk" FontSize="30" FontWeight="Bold" Foreground="White"/>
+                <TextBlock Text="Artsenportaal" FontSize="16" Foreground="#9FB0CC" Margin="0,8,0,0"/>
+                <TextBlock Text="Beheer uw afspraken en patiënten op één centrale plek."
+                           FontSize="13" Foreground="#7F90AE" TextWrapping="Wrap" Margin="0,24,0,0"/>
             </StackPanel>
         </Border>
+
+        <!-- Inlogformulier rechts -->
+        <Grid Grid.Column="1">
+            <Border Width="360" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    Background="White" CornerRadius="8" Padding="40,36,40,40">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="20" ShadowDepth="2" Opacity="0.12"/>
+                </Border.Effect>
+                <StackPanel>
+                    <!-- Titel -->
+                    <TextBlock Text="Inloggen" FontSize="22" FontWeight="Bold"
+                               Foreground="#1B2A4A" Margin="0,0,0,4"/>
+                    <TextBlock Text="Meld u aan met uw artsenaccount" FontSize="13"
+                               Foreground="#78909C" Margin="0,0,0,28"/>
+
+                    <!-- E-mail -->
+                    <TextBlock Text="E-mailadres" FontSize="13" Foreground="#37474F" Margin="0,0,0,4"/>
+                    <TextBox x:Name="TxtEmail" Height="40" Padding="10,0" FontSize="14"
+                             BorderBrush="#CFD8DC" BorderThickness="1" Margin="0,0,0,16"
+                             KeyDown="Invoer_KeyDown"/>
+
+                    <!-- Wachtwoord -->
+                    <TextBlock Text="Wachtwoord" FontSize="13" Foreground="#37474F" Margin="0,0,0,4"/>
+                    <PasswordBox x:Name="TxtPaswoord" Height="40" Padding="10,0" FontSize="14"
+                                 BorderBrush="#CFD8DC" BorderThickness="1" Margin="0,0,0,28"
+                                 KeyDown="Invoer_KeyDown"/>
+
+                    <!-- Inlogknop -->
+                    <Button Content="Inloggen" Height="44" FontSize="15" FontWeight="SemiBold"
+                            Background="#1B2A4A" Foreground="White" BorderThickness="0"
+                            Cursor="Hand" Click="BtnInloggen_Click"/>
+
+                    <!-- Foutmelding -->
+                    <TextBlock x:Name="TxtFout" Foreground="#D32F2F" FontSize="13"
+                               TextWrapping="Wrap" Margin="0,16,0,0" Visibility="Collapsed"/>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </Page>

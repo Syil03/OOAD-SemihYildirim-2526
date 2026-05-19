@@ -1,0 +1,48 @@
+<Page x:Class="PatientApp.Pages.AfsprakenPagina"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Afspraken"
+      Background="#F0F4F8">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Bovenbalk met naam van de patiënt en navigatieknoppen -->
+        <Border Grid.Row="0" Background="#2E7D32" Padding="24,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock x:Name="TxtPatientNaam" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="Uw afspraken" FontSize="13" Foreground="#C8E6C9"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="BtnProfiel" Content="Mijn profiel"
+                            Padding="14,8" Margin="0,0,8,0" Cursor="Hand"
+                            Background="#43A047" Foreground="White" BorderThickness="0"
+                            Click="BtnProfiel_Click"/>
+                    <Button x:Name="BtnUitloggen" Content="Uitloggen"
+                            Padding="14,8" Cursor="Hand"
+                            Background="#1B5E20" Foreground="White" BorderThickness="0"
+                            Click="BtnUitloggen_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Afspraken (dynamisch gegenereerde kaarten) -->
+        <ScrollViewer Grid.Row="1" Margin="24,16,24,0" VerticalScrollBarVisibility="Auto">
+            <StackPanel x:Name="PnlAfspraken"/>
+        </ScrollViewer>
+
+        <!-- Foutmelding -->
+        <TextBlock x:Name="TxtFout" Grid.Row="2" Foreground="#D32F2F" FontSize="13"
+                   Margin="24,8,24,16" TextWrapping="Wrap" Visibility="Collapsed"/>
+    </Grid>
+</Page>

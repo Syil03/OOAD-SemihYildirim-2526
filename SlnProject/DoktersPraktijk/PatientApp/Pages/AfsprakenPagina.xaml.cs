@@ -1,21 +1,18 @@
 using DokterspraktijkLib.Models;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 
-namespace DokterApp.Pages
+namespace PatientApp.Pages
 {
     public partial class AfsprakenPagina : Page
     {
-        private Dokter aangemeldeDokter;
-        private bool toonToekomstig;
+        private Patient aangemeldePatient;
 
-        public AfsprakenPagina(Dokter dokter)
+        public AfsprakenPagina(Patient patient)
         {
             InitializeComponent();
-            aangemeldeDokter = dokter;
-            toonToekomstig = true;
+            aangemeldePatient = patient;
             // Loaded vuurt ook af bij terugkeer naar deze pagina, zodat de lijst telkens vernieuwt
             Loaded += AfsprakenPagina_Loaded;
         }
@@ -23,7 +20,7 @@ namespace DokterApp.Pages
         // Herlaad de afspraken telkens wanneer de pagina wordt weergegeven (ook bij terugkeer)
         private void AfsprakenPagina_Loaded(object sender, RoutedEventArgs e)
         {
-            TxtDokterNaam.Text = "Dr. " + aangemeldeDokter.GeefVolledigeNaam();
+            TxtPatientNaam.Text = aangemeldePatient.GeefVolledigeNaam();
             LaadAfspraken();
         }
 
@@ -34,17 +31,12 @@ namespace DokterApp.Pages
 
             try
             {
-                List<Afspraak> afspraken;
-
-                if (toonToekomstig)
-                    afspraken = Afspraak.GeefToekomstigeAfspraken(aangemeldeDokter.Id);
-                else
-                    afspraken = Afspraak.GeefAfsprakenVanDokter(aangemeldeDokter.Id);
+                List<Afspraak> afspraken = Afspraak.GeefAfsprakenVanPatient(aangemeldePatient.Id);
 
                 if (afspraken.Count == 0)
                 {
                     TextBlock geenData = new TextBlock();
-                    geenData.Text = "Geen afspraken gevonden.";
+                    geenData.Text = "U heeft nog geen afspraken.";
                     geenData.FontSize = 14;
                     geenData.Foreground = new SolidColorBrush(Color.FromRgb(144, 164, 174));
                     geenData.HorizontalAlignment = HorizontalAlignment.Center;
@@ -65,7 +57,7 @@ namespace DokterApp.Pages
             }
         }
 
-        // Bouwt een klikbare kaart voor één afspraak en voegt die toe aan het paneel
+        // Bouwt een kaart voor één afspraak en voegt die toe aan het paneel
         private void MaakAfspraakKaart(Afspraak afspraak)
         {
             Border kaart = new Border();
@@ -75,31 +67,28 @@ namespace DokterApp.Pages
             kaart.CornerRadius = new CornerRadius(6);
             kaart.Margin = new Thickness(0, 0, 0, 10);
             kaart.Padding = new Thickness(16, 14, 16, 14);
-            kaart.Cursor = Cursors.Hand;
-            kaart.Tag = afspraak;
-            kaart.MouseLeftButtonUp += Kaart_MouseLeftButtonUp;
 
-            // Lay-out: patiëntnaam + klacht links, datum rechts
+            // Lay-out: dokternaam + klacht links, datum rechts
             Grid inhoud = new Grid();
             inhoud.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             inhoud.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
             StackPanel links = new StackPanel();
 
-            TextBlock txtPatient = new TextBlock();
-            txtPatient.Text = afspraak.PatientNaam;
-            txtPatient.FontSize = 15;
-            txtPatient.FontWeight = FontWeights.SemiBold;
-            txtPatient.Foreground = new SolidColorBrush(Color.FromRgb(33, 33, 33));
-            txtPatient.Margin = new Thickness(0, 0, 0, 4);
+            TextBlock txtDokter = new TextBlock();
+            txtDokter.Text = "Dr. " + afspraak.DokterNaam;
+            txtDokter.FontSize = 15;
+            txtDokter.FontWeight = FontWeights.SemiBold;
+            txtDokter.Foreground = new SolidColorBrush(Color.FromRgb(33, 33, 33));
+            txtDokter.Margin = new Thickness(0, 0, 0, 4);
 
             TextBlock txtKlacht = new TextBlock();
             txtKlacht.Text = afspraak.Klacht;
             txtKlacht.FontSize = 13;
             txtKlacht.Foreground = new SolidColorBrush(Color.FromRgb(84, 110, 122));
-            txtKlacht.TextTrimming = TextTrimming.CharacterEllipsis;
+            txtKlacht.TextWrapping = TextWrapping.Wrap;
 
-            links.Children.Add(txtPatient);
+            links.Children.Add(txtDokter);
             links.Children.Add(txtKlacht);
 
             TextBlock txtMoment = new TextBlock();
@@ -119,32 +108,17 @@ namespace DokterApp.Pages
             PnlAfspraken.Children.Add(kaart);
         }
 
-        // Navigeer naar de detailpagina van de aangeklikte afspraak
-        private void Kaart_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        // Navigeer naar de profielpagina van de ingelogde patiënt
+        private void BtnProfiel_Click(object sender, RoutedEventArgs e)
         {
-            Border kaart = (Border)sender;
-            Afspraak afspraak = (Afspraak)kaart.Tag;
-            NavigationService.Navigate(new AfspraakDetailPagina(afspraak, aangemeldeDokter));
+            NavigationService.Navigate(new ProfielPagina(aangemeldePatient));
         }
 
-        private void BtnToekomstig_Click(object sender, RoutedEventArgs e)
+        // Keer terug naar de inlogpagina en wis de navigatiegeschiedenis
+        private void BtnUitloggen_Click(object sender, RoutedEventArgs e)
         {
-            toonToekomstig = true;
-            BtnToekomstig.Background = new SolidColorBrush(Color.FromRgb(27, 42, 74));
-            BtnToekomstig.Foreground = Brushes.White;
-            BtnAlle.Background = new SolidColorBrush(Color.FromRgb(236, 239, 241));
-            BtnAlle.Foreground = new SolidColorBrush(Color.FromRgb(84, 110, 122));
-            LaadAfspraken();
-        }
-
-        private void BtnAlle_Click(object sender, RoutedEventArgs e)
-        {
-            toonToekomstig = false;
-            BtnAlle.Background = new SolidColorBrush(Color.FromRgb(27, 42, 74));
-            BtnAlle.Foreground = Brushes.White;
-            BtnToekomstig.Background = new SolidColorBrush(Color.FromRgb(236, 239, 241));
-            BtnToekomstig.Foreground = new SolidColorBrush(Color.FromRgb(84, 110, 122));
-            LaadAfspraken();
+            NavigationService.Navigate(new InlogPagina());
+            NavigationService.RemoveBackEntry();
         }
     }
 }

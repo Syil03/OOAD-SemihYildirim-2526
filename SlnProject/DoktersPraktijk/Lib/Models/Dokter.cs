@@ -191,8 +191,10 @@ namespace DokterspraktijkLib.Models
             dokter.Gsm = (string)lezer["gsm"];
             dokter.Email = (string)lezer["email"];
             dokter.Paswoord = (string)lezer["paswoord"];
-            dokter.RizivNummer = (string)lezer["rizivnummer"];
-            dokter.IsGeconventioneerd = (bool)lezer["isgeconventioneerd"];
+            // rizivnummer is een int in de databank; uitlezen met GetInt32 en omzetten naar string
+            dokter.RizivNummer = lezer.GetInt32(lezer.GetOrdinal("rizivnummer")).ToString();
+            // isgeconventioneerd is een tinyint (byte); uitlezen met GetByte en omzetten naar bool
+            dokter.IsGeconventioneerd = lezer.GetByte(lezer.GetOrdinal("isgeconventioneerd")) != 0;
             if (lezer["profielfotodata"] != DBNull.Value)
                 dokter.ProfielFotoData = (byte[])lezer["profielfotodata"];
             return dokter;
