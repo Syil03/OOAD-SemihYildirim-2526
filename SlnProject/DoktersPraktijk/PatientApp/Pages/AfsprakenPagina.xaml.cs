@@ -108,6 +108,12 @@ namespace PatientApp.Pages
             PnlAfspraken.Children.Add(kaart);
         }
 
+        // Navigeer naar de afspraak-boekenpagina en geef de ingelogde patiënt mee
+        private void BtnNieuweAfspraak_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationService.Navigate(new AfspraakBoekenPagina(aangemeldePatient));
+        }
+
         // Navigeer naar de profielpagina van de ingelogde patiënt
         private void BtnProfiel_Click(object sender, RoutedEventArgs e)
         {

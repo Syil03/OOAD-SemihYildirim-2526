@@ -182,21 +182,41 @@ namespace DokterspraktijkLib.Models
         }
 
         // Bouwt een Dokter-object op vanuit een rij van de SqlDataReader
+        // Elke string-kolom wordt eerst op NULL gecontroleerd om een DBNull-cast-fout te vermijden
         private static Dokter LeesUitLezer(SqlDataReader lezer)
         {
             Dokter dokter = new Dokter();
             dokter.Id = (int)lezer["id"];
-            dokter.Voornaam = (string)lezer["voornaam"];
-            dokter.Achternaam = (string)lezer["achternaam"];
-            dokter.Gsm = (string)lezer["gsm"];
-            dokter.Email = (string)lezer["email"];
-            dokter.Paswoord = (string)lezer["paswoord"];
+
+            // Voornaam: NULL-veilig uitlezen via kolomindex
+            int idxVoornaam = lezer.GetOrdinal("voornaam");
+            dokter.Voornaam = lezer.IsDBNull(idxVoornaam) ? "" : lezer.GetString(idxVoornaam);
+
+            // Achternaam: NULL-veilig uitlezen via kolomindex
+            int idxAchternaam = lezer.GetOrdinal("achternaam");
+            dokter.Achternaam = lezer.IsDBNull(idxAchternaam) ? "" : lezer.GetString(idxAchternaam);
+
+            // Gsm: NULL-veilig uitlezen via kolomindex (nchar kan NULL zijn)
+            int idxGsm = lezer.GetOrdinal("gsm");
+            dokter.Gsm = lezer.IsDBNull(idxGsm) ? "" : lezer.GetString(idxGsm);
+
+            // Email: NULL-veilig uitlezen via kolomindex
+            int idxEmail = lezer.GetOrdinal("email");
+            dokter.Email = lezer.IsDBNull(idxEmail) ? "" : lezer.GetString(idxEmail);
+
+            // Paswoord: NULL-veilig uitlezen via kolomindex
+            int idxPaswoord = lezer.GetOrdinal("paswoord");
+            dokter.Paswoord = lezer.IsDBNull(idxPaswoord) ? "" : lezer.GetString(idxPaswoord);
+
             // rizivnummer is een int in de databank; uitlezen met GetInt32 en omzetten naar string
             dokter.RizivNummer = lezer.GetInt32(lezer.GetOrdinal("rizivnummer")).ToString();
             // isgeconventioneerd is een tinyint (byte); uitlezen met GetByte en omzetten naar bool
             dokter.IsGeconventioneerd = lezer.GetByte(lezer.GetOrdinal("isgeconventioneerd")) != 0;
+
+            // Profielfoto: alleen uitlezen als de waarde niet NULL is
             if (lezer["profielfotodata"] != DBNull.Value)
                 dokter.ProfielFotoData = (byte[])lezer["profielfotodata"];
+
             return dokter;
         }
     }

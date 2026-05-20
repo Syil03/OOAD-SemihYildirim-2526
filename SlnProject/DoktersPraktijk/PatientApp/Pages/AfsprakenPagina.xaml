@@ -24,6 +24,10 @@
                 </StackPanel>
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="BtnNieuweAfspraak" Content="+ Nieuwe afspraak"
+                            Padding="14,8" Margin="0,0,8,0" Cursor="Hand"
+                            Background="#66BB6A" Foreground="White" BorderThickness="0"
+                            Click="BtnNieuweAfspraak_Click"/>
                     <Button x:Name="BtnProfiel" Content="Mijn profiel"
                             Padding="14,8" Margin="0,0,8,0" Cursor="Hand"
                             Background="#43A047" Foreground="White" BorderThickness="0"

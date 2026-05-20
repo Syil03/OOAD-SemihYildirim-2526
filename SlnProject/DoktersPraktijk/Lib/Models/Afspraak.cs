@@ -124,6 +124,18 @@ namespace DokterspraktijkLib.Models
             return afspraken;
         }
 
+        // Voegt een nieuwe afspraak toe aan de databank op basis van de opgegeven gegevens
+        public static void AfspraakToevoegen(int patientId, int dokterId, DateTime moment, string klacht)
+        {
+            Afspraak nieuweAfspraak = new Afspraak();
+            nieuweAfspraak.PatientId = patientId;
+            nieuweAfspraak.DokterId = dokterId;
+            nieuweAfspraak.Moment = moment;
+            nieuweAfspraak.Klacht = klacht;
+            // Id is 0, dus Opslaan() voert een INSERT uit
+            nieuweAfspraak.Opslaan();
+        }
+
         // Slaat de afspraak op: INSERT als Id == 0, anders UPDATE
         public void Opslaan()
         {
