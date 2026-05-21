@@ -20,12 +20,14 @@
                 <!-- E-mail -->
                 <TextBlock Text="E-mailadres" FontSize="13" Foreground="#37474F" Margin="0,0,0,4"/>
                 <TextBox x:Name="TxtEmail" Height="40" Padding="10,0" FontSize="14"
+                         VerticalContentAlignment="Center"
                          BorderBrush="#CFD8DC" BorderThickness="1" Margin="0,0,0,16"
                          KeyDown="Invoer_KeyDown"/>
 
                 <!-- Wachtwoord -->
                 <TextBlock Text="Wachtwoord" FontSize="13" Foreground="#37474F" Margin="0,0,0,4"/>
                 <PasswordBox x:Name="TxtPaswoord" Height="40" Padding="10,0" FontSize="14"
+                             VerticalContentAlignment="Center"
                              BorderBrush="#CFD8DC" BorderThickness="1" Margin="0,0,0,28"
                              KeyDown="Invoer_KeyDown"/>
 

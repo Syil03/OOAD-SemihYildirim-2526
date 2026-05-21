@@ -1,5 +1,6 @@
 using DokterspraktijkLib.Helpers;
 using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace DokterspraktijkLib.Models
 {
@@ -84,10 +85,13 @@ namespace DokterspraktijkLib.Models
                 using (SqlConnection verbinding = DatabaseHelper.GetConnection())
                 {
                     verbinding.Open();
-                    string sql = "SELECT DISTINCT p.id, p.voornaam, p.achternaam, p.geslacht, p.gsm, p.email, " +
-                                 "p.paswoord, p.geboortedatum, p.profielfotodata, p.notificaties " +
-                                 "FROM Patient p INNER JOIN Afspraak a ON p.id = a.patient_id " +
-                                 "WHERE a.dokter_id = @dokterId ORDER BY p.achternaam, p.voornaam";
+                    // Subquery i.p.v. JOIN: een JOIN geeft één rij per afspraak en
+                    // zou elke patiënt zo vaak tonen als hij afspraken heeft bij deze dokter
+                    string sql = "SELECT id, voornaam, achternaam, geslacht, gsm, email, " +
+                                 "paswoord, geboortedatum, profielfotodata, notificaties " +
+                                 "FROM Patient " +
+                                 "WHERE id IN (SELECT patient_id FROM Afspraak WHERE dokter_id = @dokterId) " +
+                                 "ORDER BY achternaam, voornaam";
                     using (SqlCommand opdracht = new SqlCommand(sql, verbinding))
                     {
                         opdracht.Parameters.AddWithValue("@dokterId", dokterId);
@@ -179,7 +183,9 @@ namespace DokterspraktijkLib.Models
             }
         }
 
-        // Verwijdert de patiënt uit de databank op basis van zijn id
+        // Verwijdert eerst alle afspraken van de patiënt en daarna de patiënt zelf.
+        // Volgorde is verplicht: FK_Afspraak_Patient verbiedt een DELETE op Patient
+        // zolang er nog gekoppelde rijen in Afspraak bestaan.
         public void Verwijderen()
         {
             try
@@ -187,8 +193,18 @@ namespace DokterspraktijkLib.Models
                 using (SqlConnection verbinding = DatabaseHelper.GetConnection())
                 {
                     verbinding.Open();
-                    string sql = "DELETE FROM Patient WHERE id = @id";
-                    using (SqlCommand opdracht = new SqlCommand(sql, verbinding))
+
+                    // Stap 1: verwijder alle afspraken van deze patiënt
+                    string sqlAfspraken = "DELETE FROM Afspraak WHERE patient_id = @id";
+                    using (SqlCommand opdracht = new SqlCommand(sqlAfspraken, verbinding))
+                    {
+                        opdracht.Parameters.AddWithValue("@id", Id);
+                        opdracht.ExecuteNonQuery();
+                    }
+
+                    // Stap 2: verwijder de patiënt zelf
+                    string sqlPatient = "DELETE FROM Patient WHERE id = @id";
+                    using (SqlCommand opdracht = new SqlCommand(sqlPatient, verbinding))
                     {
                         opdracht.Parameters.AddWithValue("@id", Id);
                         opdracht.ExecuteNonQuery();
@@ -211,29 +227,56 @@ namespace DokterspraktijkLib.Models
             opdracht.Parameters.AddWithValue("@email", Email);
             opdracht.Parameters.AddWithValue("@paswoord", Paswoord);
             opdracht.Parameters.AddWithValue("@geboortedatum", Geboortedatum);
-            if (ProfielFotoData != null)
-                opdracht.Parameters.AddWithValue("@profielfotodata", ProfielFotoData);
-            else
-                opdracht.Parameters.AddWithValue("@profielfotodata", DBNull.Value);
+            // SqlDbType.Image is verplicht: AddWithValue leidt bij DBNull.Value het type
+            // af als nvarchar, wat een "type clash: nvarchar incompatible with image" geeft
+            SqlParameter fotoParam = new SqlParameter("@profielfotodata", SqlDbType.Image);
+            fotoParam.Value = (ProfielFotoData != null) ? (object)ProfielFotoData : DBNull.Value;
+            opdracht.Parameters.Add(fotoParam);
             opdracht.Parameters.AddWithValue("@notificaties", (int)Notificaties);
         }
 
         // Bouwt een Patient-object op vanuit een rij van de SqlDataReader
+        // Elke string-kolom wordt eerst op NULL gecontroleerd om een DBNull-cast-fout te vermijden
         private static Patient LeesUitLezer(SqlDataReader lezer)
         {
             Patient patient = new Patient();
             patient.Id = (int)lezer["id"];
-            patient.Voornaam = (string)lezer["voornaam"];
-            patient.Achternaam = (string)lezer["achternaam"];
+
+            // Voornaam: NULL-veilig uitlezen via kolomindex
+            int idxVoornaam = lezer.GetOrdinal("voornaam");
+            patient.Voornaam = lezer.IsDBNull(idxVoornaam) ? "" : lezer.GetString(idxVoornaam);
+
+            // Achternaam: NULL-veilig uitlezen via kolomindex
+            int idxAchternaam = lezer.GetOrdinal("achternaam");
+            patient.Achternaam = lezer.IsDBNull(idxAchternaam) ? "" : lezer.GetString(idxAchternaam);
+
             // geslacht is een int in de databank; rechtstreeks uitlezen met GetInt32
             patient.Geslacht = lezer.GetInt32(lezer.GetOrdinal("geslacht"));
-            patient.Gsm = (string)lezer["gsm"];
-            patient.Email = (string)lezer["email"];
-            patient.Paswoord = (string)lezer["paswoord"];
-            patient.Geboortedatum = (DateTime)lezer["geboortedatum"];
-            patient.Notificaties = (Notificatie)(int)lezer["notificaties"];
+
+            // Gsm: NULL-veilig uitlezen via kolomindex (nchar kan NULL zijn)
+            int idxGsm = lezer.GetOrdinal("gsm");
+            patient.Gsm = lezer.IsDBNull(idxGsm) ? "" : lezer.GetString(idxGsm);
+
+            // Email: NULL-veilig uitlezen via kolomindex
+            int idxEmail = lezer.GetOrdinal("email");
+            patient.Email = lezer.IsDBNull(idxEmail) ? "" : lezer.GetString(idxEmail);
+
+            // Paswoord: NULL-veilig uitlezen via kolomindex
+            int idxPaswoord = lezer.GetOrdinal("paswoord");
+            patient.Paswoord = lezer.IsDBNull(idxPaswoord) ? "" : lezer.GetString(idxPaswoord);
+
+            // Geboortedatum: NULL-veilig uitlezen; DateTime.MinValue als fallback
+            int idxGeboortedatum = lezer.GetOrdinal("geboortedatum");
+            patient.Geboortedatum = lezer.IsDBNull(idxGeboortedatum) ? DateTime.MinValue : lezer.GetDateTime(idxGeboortedatum);
+
+            // notificaties is een int in de databank; omzetten naar het Notificatie-enum
+            int idxNotificaties = lezer.GetOrdinal("notificaties");
+            patient.Notificaties = lezer.IsDBNull(idxNotificaties) ? Notificatie.Geen : (Notificatie)lezer.GetInt32(idxNotificaties);
+
+            // Profielfoto: alleen uitlezen als de waarde niet NULL is
             if (lezer["profielfotodata"] != DBNull.Value)
                 patient.ProfielFotoData = (byte[])lezer["profielfotodata"];
+
             return patient;
         }
     }

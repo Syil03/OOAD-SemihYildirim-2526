@@ -1,8 +1,9 @@
 using DokterspraktijkLib.Models;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Threading;
+using System.Windows.Media.Imaging;
 
 namespace PatientApp.Pages
 {
@@ -12,31 +13,22 @@ namespace PatientApp.Pages
         // De ingelogde patiënt, meegegeven via de constructor
         private Patient aangemeldePatient;
 
-        // Timer die na 2 seconden terug navigeert bij een succesvolle boeking
-        private DispatcherTimer terugTimer;
-
         // Constructor: ontvangt de ingelogde patiënt van de vorige pagina
         public AfspraakBoekenPagina(Patient patient)
         {
             InitializeComponent();
             aangemeldePatient = patient;
-            terugTimer = new DispatcherTimer();
-            // Stel de timer in op 2 seconden; bij het afgaan navigeren we terug
-            terugTimer.Interval = TimeSpan.FromSeconds(2);
-            terugTimer.Tick += TerugNaVertraging;
             Loaded += AfspraakBoekenPagina_Loaded;
         }
 
-        // Wordt uitgevoerd zodra de pagina geladen is
+        // Initialiseer de pagina: vul naam, kalender, tijdstippen en dokterslijst in
         private void AfspraakBoekenPagina_Loaded(object sender, RoutedEventArgs e)
         {
-            // Toon de naam van de ingelogde patiënt in de bovenbalk
             TxtPatientNaam.Text = aangemeldePatient.GeefVolledigeNaam();
 
             // Blokkeer datums in het verleden en vandaag; enkel toekomstige datums zijn selecteerbaar
             CalDatum.DisplayDateStart = DateTime.Today.AddDays(1);
 
-            // Vul de tijdstippen en de dokterslijst in
             VulTijdstippenIn();
             LaadDokters();
         }
@@ -48,10 +40,8 @@ namespace PatientApp.Pages
             int uur = 8;
             int minuten = 0;
 
-            // Blijf tijdstippen toevoegen tot we 17:00 bereikt hebben
             while (uur < 17 || (uur == 17 && minuten == 0))
             {
-                // Formatteer als "HH:MM" met voorloopnul
                 string tijdstip = uur.ToString("00") + ":" + minuten.ToString("00");
                 CmbTijdstip.Items.Add(tijdstip);
                 minuten += 30;
@@ -63,8 +53,8 @@ namespace PatientApp.Pages
             }
         }
 
-        // Laadt alle dokters uit de databank en toont ze als ComboBoxItem in de keuzelijst
-        // Het dokter-ID wordt opgeslagen in de Tag-eigenschap van elk item
+        // Laadt alle dokters uit de databank; het volledige Dokter-object wordt in Tag bewaard
+        // zodat het infopaneel later de foto en contactgegevens kan tonen
         private void LaadDokters()
         {
             try
@@ -78,12 +68,12 @@ namespace PatientApp.Pages
                     return;
                 }
 
-                // Maak per dokter een ComboBoxItem aan met zichtbare naam en verborgen ID in Tag
-                foreach (Dokter d in dokters)
+                for (int i = 0; i < dokters.Count; i++)
                 {
                     ComboBoxItem item = new ComboBoxItem();
-                    item.Content = "Dr. " + d.Voornaam + " " + d.Achternaam;
-                    item.Tag = d.Id;
+                    item.Content = "Dr. " + dokters[i].Voornaam + " " + dokters[i].Achternaam;
+                    // Bewaar het volledige object (niet enkel het ID) voor de detailweergave
+                    item.Tag = dokters[i];
                     CmbDokter.Items.Add(item);
                 }
             }
@@ -93,13 +83,88 @@ namespace PatientApp.Pages
             }
         }
 
-        // Verwerkt de klik op "Afspraak bevestigen": valideert invoer en slaat de afspraak op
+        // Toont het infopaneel met gegevens van de geselecteerde dokter
+        private void CmbDokter_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (CmbDokter.SelectedItem == null)
+            {
+                PnlDokterInfo.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            ComboBoxItem geselecteerdItem = (ComboBoxItem)CmbDokter.SelectedItem;
+            Dokter dokter = (Dokter)geselecteerdItem.Tag;
+            ToonDokterInfo(dokter);
+        }
+
+        // Vult het infopaneel met foto (of initialen), naam, e-mail en gsm van de dokter
+        private void ToonDokterInfo(Dokter dokter)
+        {
+            TxtDokterNaam.Text = "Dr. " + dokter.Voornaam + " " + dokter.Achternaam;
+            TxtDokterEmail.Text = dokter.Email;
+            TxtDokterGsm.Text = dokter.Gsm.Trim();
+
+            if (dokter.ProfielFotoData != null && dokter.ProfielFotoData.Length > 0)
+            {
+                using (MemoryStream stroom = new MemoryStream(dokter.ProfielFotoData))
+                {
+                    BitmapImage afbeelding = new BitmapImage();
+                    afbeelding.BeginInit();
+                    // Laad meteen in het geheugen zodat de stream veilig gesloten kan worden
+                    afbeelding.CacheOption = BitmapCacheOption.OnLoad;
+                    afbeelding.StreamSource = stroom;
+                    afbeelding.EndInit();
+                    ImgDokterFoto.Source = afbeelding;
+                }
+                // Knip de afbeelding bij tot een cirkel: middelpunt (32,32), straal 32
+                ImgDokterFoto.Clip = new EllipseGeometry(new System.Windows.Point(32, 32), 32, 32);
+                ImgDokterFoto.Visibility = Visibility.Visible;
+                PnlDokterInitialen.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                // Geen foto: toon de donkerblauwe cirkel met initialen
+                TxtDokterInitialen.Text = GeefInitialen(dokter.Voornaam + " " + dokter.Achternaam);
+                ImgDokterFoto.Visibility = Visibility.Collapsed;
+                PnlDokterInitialen.Visibility = Visibility.Visible;
+            }
+
+            PnlDokterInfo.Visibility = Visibility.Visible;
+        }
+
+        // Bouwt twee initialen op uit de voor- en achternaam (eerste letter van elk deel)
+        private string GeefInitialen(string volledigeNaam)
+        {
+            string initialen = string.Empty;
+            string[] delen = volledigeNaam.Trim().Split(' ');
+            for (int i = 0; i < delen.Length; i++)
+            {
+                if (delen[i].Length > 0)
+                {
+                    initialen += char.ToUpper(delen[i][0]);
+                }
+            }
+            // Hou maximaal twee letters over: de eerste en de laatste
+            if (initialen.Length > 2)
+            {
+                initialen = initialen.Substring(0, 1) + initialen.Substring(initialen.Length - 1, 1);
+            }
+            return initialen;
+        }
+
+        // Valideert het formulier en slaat de afspraak op in de databank
         private void BtnBevestigen_Click(object sender, RoutedEventArgs e)
         {
-            // Verberg eventuele vorige foutmeldingen
             TxtFout.Visibility = Visibility.Collapsed;
 
-            // --- Validatie 1: datum geselecteerd ---
+            // --- Validatie 1: dokter geselecteerd ---
+            if (CmbDokter.SelectedIndex < 0)
+            {
+                ToonFout("Gelieve een dokter te selecteren.");
+                return;
+            }
+
+            // --- Validatie 2: datum geselecteerd ---
             if (CalDatum.SelectedDate == null)
             {
                 ToonFout("Gelieve een datum te kiezen.");
@@ -108,32 +173,25 @@ namespace PatientApp.Pages
 
             DateTime gekozenDatum = CalDatum.SelectedDate.Value;
 
-            // --- Validatie 2: datum moet in de toekomst liggen ---
+            // --- Validatie 3: datum moet in de toekomst liggen ---
             if (gekozenDatum <= DateTime.Today)
             {
                 ToonFout("De gekozen datum moet in de toekomst liggen. Kies minstens morgen.");
                 return;
             }
 
-            // --- Validatie 3: tijdstip geselecteerd ---
+            // --- Validatie 4: tijdstip geselecteerd ---
             if (CmbTijdstip.SelectedIndex < 0)
             {
                 ToonFout("Gelieve een tijdstip te kiezen.");
                 return;
             }
 
-            // --- Validatie 4: klacht niet leeg ---
+            // --- Validatie 5: klacht niet leeg ---
             string klacht = TxtKlacht.Text.Trim();
             if (klacht.Length == 0)
             {
                 ToonFout("Gelieve een reden van bezoek of klacht in te vullen.");
-                return;
-            }
-
-            // --- Validatie 5: dokter geselecteerd ---
-            if (CmbDokter.SelectedIndex < 0)
-            {
-                ToonFout("Gelieve een dokter te selecteren.");
                 return;
             }
 
@@ -144,23 +202,14 @@ namespace PatientApp.Pages
             int minuten = int.Parse(tijdDelen[1]);
             DateTime moment = new DateTime(gekozenDatum.Year, gekozenDatum.Month, gekozenDatum.Day, uur, minuten, 0);
 
-            // Lees het dokter-ID op uit de Tag van het geselecteerde ComboBoxItem
-            ComboBoxItem geselecteerdItem = (ComboBoxItem)CmbDokter.SelectedItem;
-            int dokterId = (int)geselecteerdItem.Tag;
+            // Lees het Dokter-object op uit de Tag van het geselecteerde ComboBoxItem
+            ComboBoxItem geselecteerdDokterItem = (ComboBoxItem)CmbDokter.SelectedItem;
+            Dokter geselecteerdeDokter = (Dokter)geselecteerdDokterItem.Tag;
 
             try
             {
-                // Sla de afspraak op via de library-methode
-                Afspraak.AfspraakToevoegen(aangemeldePatient.Id, dokterId, moment, klacht);
-
-                // Toon succesmelding in het groen
-                ToonSucces("Afspraak succesvol geboekt! U wordt teruggestuurd naar uw overzicht...");
-
-                // Deactiveer de bevestigingsknop zodat er niet twee keer wordt ingediend
-                BtnBevestigen.IsEnabled = false;
-
-                // Start de terugkeertimer: na 2 seconden navigeren we automatisch terug
-                terugTimer.Start();
+                Afspraak.AfspraakToevoegen(aangemeldePatient.Id, geselecteerdeDokter.Id, moment, klacht);
+                NavigationService.GoBack();
             }
             catch (Exception fout)
             {
@@ -168,18 +217,9 @@ namespace PatientApp.Pages
             }
         }
 
-        // Wordt aangeroepen door de DispatcherTimer na 2 seconden: navigeert terug naar de afsprakenpagina
-        private void TerugNaVertraging(object? sender, EventArgs e)
-        {
-            terugTimer.Stop();
-            NavigationService.GoBack();
-        }
-
         // Navigeert terug naar de vorige pagina bij klikken op de terugknop
         private void BtnTerug_Click(object sender, RoutedEventArgs e)
         {
-            // Stop de terugkeertimer indien die nog loopt na een succesvolle boeking
-            terugTimer.Stop();
             NavigationService.GoBack();
         }
 
@@ -188,14 +228,6 @@ namespace PatientApp.Pages
         {
             TxtFout.Text = bericht;
             TxtFout.Foreground = new SolidColorBrush(Color.FromRgb(211, 47, 47));
-            TxtFout.Visibility = Visibility.Visible;
-        }
-
-        // Toont een succesmelding in groen in het TxtFout TextBlock
-        private void ToonSucces(string bericht)
-        {
-            TxtFout.Text = bericht;
-            TxtFout.Foreground = new SolidColorBrush(Color.FromRgb(46, 125, 50));
             TxtFout.Visibility = Visibility.Visible;
         }
     }

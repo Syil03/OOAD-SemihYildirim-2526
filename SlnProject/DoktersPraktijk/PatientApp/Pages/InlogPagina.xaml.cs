@@ -54,9 +54,9 @@ namespace PatientApp.Pages
                     return;
                 }
 
-                // Navigeer naar de afsprakenpagina en verwijder de inlogpagina uit de geschiedenis
-                NavigationService.Navigate(new AfsprakenPagina(aangemeldePatient));
-                NavigationService.RemoveBackEntry();
+                // Geef de ingelogde patiënt door aan het hoofdvenster zodat de sidebar getoond wordt
+                MainWindow hoofdVenster = (MainWindow)Window.GetWindow(this);
+                hoofdVenster.ToonSidebar(aangemeldePatient);
             }
             catch (Exception fout)
             {

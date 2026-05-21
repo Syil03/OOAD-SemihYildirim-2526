@@ -4,70 +4,109 @@
       Title="Afspraken"
       Background="#F0F4F8">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="240"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-        <!-- Navy sidebar met branding en naam van de ingelogde dokter -->
-        <Border Grid.Column="0" Background="#1B2A4A">
-            <StackPanel>
-                <!-- Branding -->
-                <TextBlock Text="Dokterspraktijk" FontSize="18" FontWeight="Bold"
-                           Foreground="White" Margin="24,28,24,2"/>
-                <TextBlock Text="Artsenportaal" FontSize="12" Foreground="#9FB0CC"
-                           Margin="24,0,24,28"/>
+        <!-- Paginatitel -->
+        <Border Grid.Row="0" Background="White" BorderBrush="#E0E0E0"
+                BorderThickness="0,0,0,1" Padding="28,18">
+            <TextBlock Text="Mijn afspraken" FontSize="20" FontWeight="Bold" Foreground="#212121"/>
+        </Border>
 
-                <!-- Ingelogde dokter -->
-                <Border Background="#243657" Padding="24,16">
+        <!-- Hoofdinhoud: kalender links, profielfoto rechts -->
+        <Grid Grid.Row="1" Margin="28,20,28,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ===== LINKER PANEEL ===== -->
+            <StackPanel Grid.Column="0">
+
+                <!-- Kalenderwidget waarmee de datum wordt geselecteerd -->
+                <Calendar x:Name="Kalender"
+                          SelectionMode="SingleDate"
+                          SelectedDatesChanged="Kalender_SelectedDatesChanged"
+                          Margin="0,0,0,14"/>
+
+                <!-- Geselecteerde datum in leesbaar formaat -->
+                <TextBlock x:Name="TxtGeselecteerdeDatum"
+                           FontSize="14" FontWeight="SemiBold" Foreground="#1B2A4A"
+                           Margin="0,0,0,10"/>
+
+                <!-- Melding wanneer er geen afspraken zijn op de geselecteerde dag -->
+                <TextBlock x:Name="TxtGeenAfspraken"
+                           Text="Geen afspraken op deze dag."
+                           FontSize="13" Foreground="#90A4AE"
+                           Margin="0,0,0,10" Visibility="Collapsed"/>
+
+                <!-- Lijst van afspraken: elk item toont tijdstip en naam van de patiënt -->
+                <ListBox x:Name="LstAfspraken"
+                         Height="180"
+                         BorderBrush="#CFD8DC" BorderThickness="1"
+                         Background="White"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         Visibility="Collapsed"
+                         SelectionChanged="LstAfspraken_SelectionChanged"
+                         Margin="0,0,0,16"/>
+
+                <!-- Detailpaneel: zichtbaar bij selectie van een afspraak -->
+                <Border x:Name="PnlDetail"
+                        Visibility="Collapsed"
+                        Background="White" CornerRadius="6" Padding="16,14"
+                        BorderBrush="#CFD8DC" BorderThickness="1">
                     <StackPanel>
-                        <TextBlock Text="INGELOGD ALS" FontSize="10" FontWeight="SemiBold"
-                                   Foreground="#7F90AE" Margin="0,0,0,4"/>
-                        <TextBlock x:Name="TxtDokterNaam" FontSize="15" FontWeight="Bold"
-                                   Foreground="White" TextWrapping="Wrap"/>
+                        <TextBlock Text="REDEN VAN CONSULTATIE" FontSize="11"
+                                   FontWeight="SemiBold" Foreground="#7F90AE"
+                                   Margin="0,0,0,6"/>
+                        <TextBlock x:Name="TxtKlacht" FontSize="14"
+                                   Foreground="#37474F" TextWrapping="Wrap"
+                                   Margin="0,0,0,16"/>
+                        <!-- Knop is uitgeschakeld voor afspraken in het verleden -->
+                        <Button x:Name="BtnAnnuleren" Content="Afspraak annuleren"
+                                Padding="14,8" Background="#D32F2F" Foreground="White"
+                                BorderThickness="0" Cursor="Hand"
+                                HorizontalAlignment="Left"
+                                Click="BtnAnnuleren_Click"/>
                     </StackPanel>
                 </Border>
             </StackPanel>
-        </Border>
 
-        <!-- Hoofdgedeelte -->
-        <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+            <!-- ===== RECHTER PANEEL: profielfoto van de ingelogde dokter ===== -->
+            <StackPanel Grid.Column="1" HorizontalAlignment="Center"
+                        VerticalAlignment="Top" Margin="48,0,0,0">
 
-            <!-- Donkere header -->
-            <Border Grid.Row="0" Background="#1B2A4A" Padding="28,20">
-                <StackPanel>
-                    <TextBlock Text="Uw afspraken" FontSize="20" FontWeight="Bold" Foreground="White"/>
-                    <TextBlock Text="Overzicht van uw geplande consultaties" FontSize="13"
-                               Foreground="#9FB0CC"/>
-                </StackPanel>
-            </Border>
+                <TextBlock Text="INGELOGDE ARTS" FontSize="10" FontWeight="SemiBold"
+                           Foreground="#7F90AE" HorizontalAlignment="Center"
+                           Margin="0,0,0,12"/>
 
-            <!-- Filterrij -->
-            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="28,18,28,0">
-                <Button x:Name="BtnToekomstig" Content="Toekomstige afspraken"
-                        Padding="14,8" Margin="0,0,8,0" Cursor="Hand"
-                        Background="#1B2A4A" Foreground="White" BorderThickness="0"
-                        Click="BtnToekomstig_Click"/>
-                <Button x:Name="BtnAlle" Content="Alle afspraken"
-                        Padding="14,8" Cursor="Hand"
-                        Background="#ECEFF1" Foreground="#546E7A" BorderThickness="0"
-                        Click="BtnAlle_Click"/>
+                <!-- Container voor foto of initialen-placeholder (beide overlappend in een Grid) -->
+                <Grid Width="120" Height="120" HorizontalAlignment="Center"
+                      Margin="0,0,0,14">
+                    <!-- Echte profielfoto; wordt rondgeknipt via code-behind -->
+                    <Image x:Name="ImgProfielfoto" Width="120" Height="120"
+                           Stretch="UniformToFill" Visibility="Collapsed"/>
+                    <!-- Grijze cirkel met initialen als er geen foto is -->
+                    <Grid x:Name="PnlFotoPlaceholder">
+                        <Ellipse Width="120" Height="120" Fill="#B0BEC5"/>
+                        <TextBlock x:Name="TxtInitialen" FontSize="36" FontWeight="Bold"
+                                   Foreground="White" HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Grid>
+                </Grid>
+
+                <!-- Naam van de ingelogde dokter -->
+                <TextBlock x:Name="TxtDokterNaamFoto" FontSize="15" FontWeight="SemiBold"
+                           Foreground="#1B2A4A" HorizontalAlignment="Center"
+                           TextWrapping="Wrap" TextAlignment="Center" MaxWidth="200"/>
             </StackPanel>
-
-            <!-- Afspraken (dynamisch gegenereerde kaarten) -->
-            <ScrollViewer Grid.Row="2" Margin="28,14,28,0" VerticalScrollBarVisibility="Auto">
-                <StackPanel x:Name="PnlAfspraken"/>
-            </ScrollViewer>
-
-            <!-- Foutmelding -->
-            <TextBlock x:Name="TxtFout" Grid.Row="3" Foreground="#D32F2F" FontSize="13"
-                       Margin="28,8,28,16" TextWrapping="Wrap" Visibility="Collapsed"/>
         </Grid>
+
+        <!-- Foutmelding -->
+        <TextBlock x:Name="TxtFout" Grid.Row="2" Foreground="#D32F2F" FontSize="13"
+                   Margin="28,0,28,12" TextWrapping="Wrap" Visibility="Collapsed"/>
     </Grid>
 </Page>

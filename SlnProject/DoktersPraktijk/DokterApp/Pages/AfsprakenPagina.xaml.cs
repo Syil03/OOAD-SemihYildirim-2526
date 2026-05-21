@@ -1,150 +1,238 @@
 using DokterspraktijkLib.Models;
+using System.Globalization;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace DokterApp.Pages
 {
     public partial class AfsprakenPagina : Page
     {
         private Dokter aangemeldeDokter;
-        private bool toonToekomstig;
+
+        // Volledige lijst van afspraken; wordt gefilterd per geselecteerde datum
+        private List<Afspraak> alleAfspraken;
+
+        // De momenteel geselecteerde afspraak in de ListBox
+        private Afspraak geselecteerdeAfspraak;
 
         public AfsprakenPagina(Dokter dokter)
         {
             InitializeComponent();
             aangemeldeDokter = dokter;
-            toonToekomstig = true;
-            // Loaded vuurt ook af bij terugkeer naar deze pagina, zodat de lijst telkens vernieuwt
+            alleAfspraken = new List<Afspraak>();
+            // Loaded vuurt ook af bij terugkeer naar deze pagina
             Loaded += AfsprakenPagina_Loaded;
         }
 
-        // Herlaad de afspraken telkens wanneer de pagina wordt weergegeven (ook bij terugkeer)
+        // Initialiseer de pagina: laad de foto, haal alle afspraken op en selecteer vandaag
         private void AfsprakenPagina_Loaded(object sender, RoutedEventArgs e)
         {
-            TxtDokterNaam.Text = "Dr. " + aangemeldeDokter.GeefVolledigeNaam();
-            LaadAfspraken();
+            ToonProfielfoto();
+            LaadAlleAfspraken();
+            // Het instellen van SelectedDate activeert SelectedDatesChanged en vult de lijst
+            Kalender.SelectedDate = DateTime.Today;
         }
 
-        private void LaadAfspraken()
+        // Toont de profielfoto van de dokter als cirkel; valt terug op initialen als er geen foto is
+        private void ToonProfielfoto()
         {
-            PnlAfspraken.Children.Clear();
-            TxtFout.Visibility = Visibility.Collapsed;
+            TxtDokterNaamFoto.Text = "Dr. " + aangemeldeDokter.Voornaam + " " + aangemeldeDokter.Achternaam;
 
+            if (aangemeldeDokter.ProfielFotoData != null && aangemeldeDokter.ProfielFotoData.Length > 0)
+            {
+                using (MemoryStream stroom = new MemoryStream(aangemeldeDokter.ProfielFotoData))
+                {
+                    BitmapImage afbeelding = new BitmapImage();
+                    afbeelding.BeginInit();
+                    // Laad meteen in het geheugen zodat de stream veilig gesloten kan worden
+                    afbeelding.CacheOption = BitmapCacheOption.OnLoad;
+                    afbeelding.StreamSource = stroom;
+                    afbeelding.EndInit();
+                    ImgProfielfoto.Source = afbeelding;
+                }
+
+                // Knip de afbeelding bij tot een cirkel: middelpunt (60,60), straal 60
+                ImgProfielfoto.Clip = new EllipseGeometry(new Point(60, 60), 60, 60);
+                ImgProfielfoto.Visibility = Visibility.Visible;
+                PnlFotoPlaceholder.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                // Geen foto: toon de grijze cirkel met de initialen van de dokter
+                TxtInitialen.Text = GeefInitialen(aangemeldeDokter.Voornaam + " " + aangemeldeDokter.Achternaam);
+                ImgProfielfoto.Visibility = Visibility.Collapsed;
+                PnlFotoPlaceholder.Visibility = Visibility.Visible;
+            }
+        }
+
+        // Haalt alle afspraken van de ingelogde dokter op uit de databank
+        private void LaadAlleAfspraken()
+        {
+            TxtFout.Visibility = Visibility.Collapsed;
             try
             {
-                List<Afspraak> afspraken;
-
-                if (toonToekomstig)
-                    afspraken = Afspraak.GeefToekomstigeAfspraken(aangemeldeDokter.Id);
-                else
-                    afspraken = Afspraak.GeefAfsprakenVanDokter(aangemeldeDokter.Id);
-
-                if (afspraken.Count == 0)
-                {
-                    TextBlock geenData = new TextBlock();
-                    geenData.Text = "Geen afspraken gevonden.";
-                    geenData.FontSize = 14;
-                    geenData.Foreground = new SolidColorBrush(Color.FromRgb(144, 164, 174));
-                    geenData.HorizontalAlignment = HorizontalAlignment.Center;
-                    geenData.Margin = new Thickness(0, 40, 0, 0);
-                    PnlAfspraken.Children.Add(geenData);
-                    return;
-                }
-
-                for (int i = 0; i < afspraken.Count; i++)
-                {
-                    MaakAfspraakKaart(afspraken[i]);
-                }
+                alleAfspraken = Afspraak.GeefAfsprakenVanDokter(aangemeldeDokter.Id);
             }
             catch (Exception fout)
             {
                 TxtFout.Text = "Fout bij het laden van afspraken: " + fout.Message;
                 TxtFout.Visibility = Visibility.Visible;
+                alleAfspraken = new List<Afspraak>();
             }
         }
 
-        // Bouwt een klikbare kaart voor één afspraak en voegt die toe aan het paneel
-        private void MaakAfspraakKaart(Afspraak afspraak)
+        // Filtert alleAfspraken op de opgegeven datum en vult de ListBox
+        private void LaadAfsprakenVoorDatum(DateTime datum)
         {
-            Border kaart = new Border();
-            kaart.Background = Brushes.White;
-            kaart.BorderBrush = new SolidColorBrush(Color.FromRgb(207, 216, 220));
-            kaart.BorderThickness = new Thickness(1);
-            kaart.CornerRadius = new CornerRadius(6);
-            kaart.Margin = new Thickness(0, 0, 0, 10);
-            kaart.Padding = new Thickness(16, 14, 16, 14);
-            kaart.Cursor = Cursors.Hand;
-            kaart.Tag = afspraak;
-            kaart.MouseLeftButtonUp += Kaart_MouseLeftButtonUp;
+            LstAfspraken.Items.Clear();
+            PnlDetail.Visibility = Visibility.Collapsed;
+            geselecteerdeAfspraak = null;
 
-            // Lay-out: patiëntnaam + klacht links, datum rechts
-            Grid inhoud = new Grid();
-            inhoud.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            inhoud.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            // Datum weergeven in leesbaar Nederlands formaat
+            TxtGeselecteerdeDatum.Text = datum.ToString("dddd d MMMM yyyy", new CultureInfo("nl-BE"));
 
-            StackPanel links = new StackPanel();
+            // Filter via een for-lus (geen LINQ)
+            List<Afspraak> gefilterd = new List<Afspraak>();
+            for (int i = 0; i < alleAfspraken.Count; i++)
+            {
+                if (alleAfspraken[i].Moment.Date == datum.Date)
+                {
+                    gefilterd.Add(alleAfspraken[i]);
+                }
+            }
 
-            TextBlock txtPatient = new TextBlock();
-            txtPatient.Text = afspraak.PatientNaam;
-            txtPatient.FontSize = 15;
-            txtPatient.FontWeight = FontWeights.SemiBold;
-            txtPatient.Foreground = new SolidColorBrush(Color.FromRgb(33, 33, 33));
-            txtPatient.Margin = new Thickness(0, 0, 0, 4);
+            if (gefilterd.Count == 0)
+            {
+                TxtGeenAfspraken.Visibility = Visibility.Visible;
+                LstAfspraken.Visibility = Visibility.Collapsed;
+                return;
+            }
 
-            TextBlock txtKlacht = new TextBlock();
-            txtKlacht.Text = afspraak.Klacht;
-            txtKlacht.FontSize = 13;
-            txtKlacht.Foreground = new SolidColorBrush(Color.FromRgb(84, 110, 122));
-            txtKlacht.TextTrimming = TextTrimming.CharacterEllipsis;
+            TxtGeenAfspraken.Visibility = Visibility.Collapsed;
+            LstAfspraken.Visibility = Visibility.Visible;
 
-            links.Children.Add(txtPatient);
-            links.Children.Add(txtKlacht);
+            // Voeg per afspraak een ListBoxItem toe met tijdstip en patiëntnaam
+            for (int i = 0; i < gefilterd.Count; i++)
+            {
+                ListBoxItem item = new ListBoxItem();
+                item.Tag = gefilterd[i];
+                item.Padding = new Thickness(12, 10, 12, 10);
 
-            TextBlock txtMoment = new TextBlock();
-            txtMoment.Text = afspraak.Moment.ToString("dd/MM/yyyy") + "\n" + afspraak.Moment.ToString("HH:mm");
-            txtMoment.FontSize = 13;
-            txtMoment.Foreground = new SolidColorBrush(Color.FromRgb(84, 110, 122));
-            txtMoment.TextAlignment = TextAlignment.Right;
-            txtMoment.VerticalAlignment = VerticalAlignment.Center;
-            txtMoment.Margin = new Thickness(16, 0, 0, 0);
+                // Twee kolommen: tijdstip links, naam rechts
+                Grid rij = new Grid();
+                rij.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(56) });
+                rij.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-            Grid.SetColumn(links, 0);
-            Grid.SetColumn(txtMoment, 1);
-            inhoud.Children.Add(links);
-            inhoud.Children.Add(txtMoment);
+                TextBlock txtTijd = new TextBlock();
+                txtTijd.Text = gefilterd[i].Moment.ToString("HH:mm");
+                txtTijd.FontSize = 14;
+                txtTijd.FontWeight = FontWeights.SemiBold;
+                txtTijd.Foreground = new SolidColorBrush(Color.FromRgb(27, 42, 74));
+                txtTijd.VerticalAlignment = VerticalAlignment.Center;
 
-            kaart.Child = inhoud;
-            PnlAfspraken.Children.Add(kaart);
+                TextBlock txtNaam = new TextBlock();
+                txtNaam.Text = gefilterd[i].PatientNaam;
+                txtNaam.FontSize = 14;
+                txtNaam.Foreground = new SolidColorBrush(Color.FromRgb(33, 33, 33));
+                txtNaam.VerticalAlignment = VerticalAlignment.Center;
+                txtNaam.TextTrimming = TextTrimming.CharacterEllipsis;
+
+                Grid.SetColumn(txtTijd, 0);
+                Grid.SetColumn(txtNaam, 1);
+                rij.Children.Add(txtTijd);
+                rij.Children.Add(txtNaam);
+
+                item.Content = rij;
+                LstAfspraken.Items.Add(item);
+            }
         }
 
-        // Navigeer naar de detailpagina van de aangeklikte afspraak
-        private void Kaart_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        // Datum geselecteerd in de kalender: ververs de afsprakenlijst
+        private void Kalender_SelectedDatesChanged(object sender, SelectionChangedEventArgs e)
         {
-            Border kaart = (Border)sender;
-            Afspraak afspraak = (Afspraak)kaart.Tag;
-            NavigationService.Navigate(new AfspraakDetailPagina(afspraak, aangemeldeDokter));
+            if (Kalender.SelectedDate != null)
+            {
+                LaadAfsprakenVoorDatum(Kalender.SelectedDate.Value);
+            }
         }
 
-        private void BtnToekomstig_Click(object sender, RoutedEventArgs e)
+        // Item geselecteerd in de ListBox: toon de klacht en pas de knopstatus aan
+        private void LstAfspraken_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            toonToekomstig = true;
-            BtnToekomstig.Background = new SolidColorBrush(Color.FromRgb(27, 42, 74));
-            BtnToekomstig.Foreground = Brushes.White;
-            BtnAlle.Background = new SolidColorBrush(Color.FromRgb(236, 239, 241));
-            BtnAlle.Foreground = new SolidColorBrush(Color.FromRgb(84, 110, 122));
-            LaadAfspraken();
+            // SelectedItem == null is betrouwbaarder dan SelectedIndex < 0 bij programmatisch
+            // toegevoegde ListBoxItems: SelectedIndex kan transiënt -1 zijn tijdens opbouw
+            if (LstAfspraken.SelectedItem == null)
+            {
+                PnlDetail.Visibility = Visibility.Collapsed;
+                BtnAnnuleren.IsEnabled = false;
+                geselecteerdeAfspraak = null;
+                return;
+            }
+
+            ListBoxItem geselecteerdItem = (ListBoxItem)LstAfspraken.SelectedItem;
+            geselecteerdeAfspraak = (Afspraak)geselecteerdItem.Tag;
+
+            TxtKlacht.Text = geselecteerdeAfspraak.Klacht;
+
+            // Knop expliciet in- of uitschakelen op basis van het tijdstip van de afspraak
+            if (geselecteerdeAfspraak.Moment > DateTime.Now)
+            {
+                BtnAnnuleren.IsEnabled = true;
+            }
+            else
+            {
+                BtnAnnuleren.IsEnabled = false;
+            }
+
+            PnlDetail.Visibility = Visibility.Visible;
         }
 
-        private void BtnAlle_Click(object sender, RoutedEventArgs e)
+        // Verwijdert de geselecteerde afspraak uit de databank en herlaadt de lijst
+        private void BtnAnnuleren_Click(object sender, RoutedEventArgs e)
         {
-            toonToekomstig = false;
-            BtnAlle.Background = new SolidColorBrush(Color.FromRgb(27, 42, 74));
-            BtnAlle.Foreground = Brushes.White;
-            BtnToekomstig.Background = new SolidColorBrush(Color.FromRgb(236, 239, 241));
-            BtnToekomstig.Foreground = new SolidColorBrush(Color.FromRgb(84, 110, 122));
-            LaadAfspraken();
+            if (geselecteerdeAfspraak == null) return;
+
+            TxtFout.Visibility = Visibility.Collapsed;
+
+            try
+            {
+                geselecteerdeAfspraak.Verwijderen();
+
+                // Herlaad alle afspraken en toon de huidige dag opnieuw
+                LaadAlleAfspraken();
+                if (Kalender.SelectedDate != null)
+                {
+                    LaadAfsprakenVoorDatum(Kalender.SelectedDate.Value);
+                }
+            }
+            catch (Exception fout)
+            {
+                TxtFout.Text = "Fout bij het annuleren van de afspraak: " + fout.Message;
+                TxtFout.Visibility = Visibility.Visible;
+            }
+        }
+
+        // Bouwt twee initialen op uit de voor- en achternaam (eerste letter van elk deel)
+        private string GeefInitialen(string volledigeNaam)
+        {
+            string initialen = string.Empty;
+            string[] delen = volledigeNaam.Trim().Split(' ');
+            for (int i = 0; i < delen.Length; i++)
+            {
+                if (delen[i].Length > 0)
+                {
+                    initialen += char.ToUpper(delen[i][0]);
+                }
+            }
+            // Hou maximaal twee letters over: de eerste en de laatste
+            if (initialen.Length > 2)
+            {
+                initialen = initialen.Substring(0, 1) + initialen.Substring(initialen.Length - 1, 1);
+            }
+            return initialen;
         }
     }
 }

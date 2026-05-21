@@ -55,9 +55,9 @@ namespace DokterApp.Pages
                     return;
                 }
 
-                // Navigeer naar de afsprakenpagina en verwijder de inlogpagina uit de geschiedenis
-                NavigationService.Navigate(new AfsprakenPagina(aangemeldeDokter));
-                NavigationService.RemoveBackEntry();
+                // Geef de ingelogde dokter door aan het hoofdvenster zodat de sidebar getoond wordt
+                MainWindow hoofdVenster = (MainWindow)Window.GetWindow(this);
+                hoofdVenster.ToonSidebar(aangemeldeDokter);
             }
             catch (Exception fout)
             {

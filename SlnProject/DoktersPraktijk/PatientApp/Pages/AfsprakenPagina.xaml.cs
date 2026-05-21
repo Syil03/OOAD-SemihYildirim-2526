@@ -9,57 +9,89 @@ namespace PatientApp.Pages
     {
         private Patient aangemeldePatient;
 
+        // Volledige lijst van afspraken; wordt gefilterd op basis van de radioknop
+        private List<Afspraak> alleAfspraken;
+
+        // De momenteel geselecteerde afspraak in de ListBox
+        private Afspraak geselecteerdeAfspraak;
+
         public AfsprakenPagina(Patient patient)
         {
             InitializeComponent();
             aangemeldePatient = patient;
+            alleAfspraken = new List<Afspraak>();
             // Loaded vuurt ook af bij terugkeer naar deze pagina, zodat de lijst telkens vernieuwt
             Loaded += AfsprakenPagina_Loaded;
         }
 
-        // Herlaad de afspraken telkens wanneer de pagina wordt weergegeven (ook bij terugkeer)
+        // Herlaad de afspraken en ververs de lijst bij elke weergave van de pagina
         private void AfsprakenPagina_Loaded(object sender, RoutedEventArgs e)
         {
-            TxtPatientNaam.Text = aangemeldePatient.GeefVolledigeNaam();
-            LaadAfspraken();
+            LaadAlleAfspraken();
+            ToonGefilterdeLijst();
         }
 
-        private void LaadAfspraken()
+        // Haalt alle afspraken van de ingelogde patiënt op uit de databank
+        private void LaadAlleAfspraken()
         {
-            PnlAfspraken.Children.Clear();
             TxtFout.Visibility = Visibility.Collapsed;
-
             try
             {
-                List<Afspraak> afspraken = Afspraak.GeefAfsprakenVanPatient(aangemeldePatient.Id);
-
-                if (afspraken.Count == 0)
-                {
-                    TextBlock geenData = new TextBlock();
-                    geenData.Text = "U heeft nog geen afspraken.";
-                    geenData.FontSize = 14;
-                    geenData.Foreground = new SolidColorBrush(Color.FromRgb(144, 164, 174));
-                    geenData.HorizontalAlignment = HorizontalAlignment.Center;
-                    geenData.Margin = new Thickness(0, 40, 0, 0);
-                    PnlAfspraken.Children.Add(geenData);
-                    return;
-                }
-
-                for (int i = 0; i < afspraken.Count; i++)
-                {
-                    MaakAfspraakKaart(afspraken[i]);
-                }
+                alleAfspraken = Afspraak.GeefAfsprakenVanPatient(aangemeldePatient.Id);
             }
             catch (Exception fout)
             {
                 TxtFout.Text = "Fout bij het laden van afspraken: " + fout.Message;
                 TxtFout.Visibility = Visibility.Visible;
+                alleAfspraken = new List<Afspraak>();
             }
         }
 
-        // Bouwt een kaart voor één afspraak en voegt die toe aan het paneel
-        private void MaakAfspraakKaart(Afspraak afspraak)
+        // Filtert alleAfspraken op basis van de actieve radioknop en vult de ListBox
+        private void ToonGefilterdeLijst()
         {
+            LstAfspraken.Items.Clear();
+            geselecteerdeAfspraak = null;
+            BtnAnnuleren.IsEnabled = false;
+
+            bool alleenToekomstig = RdoToekomstige.IsChecked == true;
+
+            // Filter via een for-lus (geen LINQ)
+            List<Afspraak> gefilterd = new List<Afspraak>();
+            for (int i = 0; i < alleAfspraken.Count; i++)
+            {
+                if (!alleenToekomstig || alleAfspraken[i].Moment > DateTime.Now)
+                {
+                    gefilterd.Add(alleAfspraken[i]);
+                }
+            }
+
+            if (gefilterd.Count == 0)
+            {
+                TxtGeenAfspraken.Text = alleenToekomstig
+                    ? "U heeft geen toekomstige afspraken."
+                    : "U heeft nog geen afspraken.";
+                TxtGeenAfspraken.Visibility = Visibility.Visible;
+                LstAfspraken.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            TxtGeenAfspraken.Visibility = Visibility.Collapsed;
+            LstAfspraken.Visibility = Visibility.Visible;
+
+            for (int i = 0; i < gefilterd.Count; i++)
+            {
+                MaakAfspraakItem(gefilterd[i]);
+            }
+        }
+
+        // Bouwt een klikbaar ListBoxItem voor één afspraak; het Afspraak-object zit in Tag
+        private void MaakAfspraakItem(Afspraak afspraak)
+        {
+            ListBoxItem item = new ListBoxItem();
+            item.Tag = afspraak;
+            item.Padding = new Thickness(0);
+
             Border kaart = new Border();
             kaart.Background = Brushes.White;
             kaart.BorderBrush = new SolidColorBrush(Color.FromRgb(207, 216, 220));
@@ -68,7 +100,7 @@ namespace PatientApp.Pages
             kaart.Margin = new Thickness(0, 0, 0, 10);
             kaart.Padding = new Thickness(16, 14, 16, 14);
 
-            // Lay-out: dokternaam + klacht links, datum rechts
+            // Lay-out: dokternaam + klacht links, datum en tijdstip rechts
             Grid inhoud = new Grid();
             inhoud.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             inhoud.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
@@ -105,26 +137,64 @@ namespace PatientApp.Pages
             inhoud.Children.Add(txtMoment);
 
             kaart.Child = inhoud;
-            PnlAfspraken.Children.Add(kaart);
+            item.Content = kaart;
+            LstAfspraken.Items.Add(item);
+        }
+
+        // Schakel de annulerknop in als en alleen als de geselecteerde afspraak in de toekomst ligt
+        private void LstAfspraken_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (LstAfspraken.SelectedItem == null)
+            {
+                BtnAnnuleren.IsEnabled = false;
+                geselecteerdeAfspraak = null;
+                return;
+            }
+
+            ListBoxItem geselecteerdItem = (ListBoxItem)LstAfspraken.SelectedItem;
+            geselecteerdeAfspraak = (Afspraak)geselecteerdItem.Tag;
+
+            if (geselecteerdeAfspraak.Moment > DateTime.Now)
+            {
+                BtnAnnuleren.IsEnabled = true;
+            }
+            else
+            {
+                BtnAnnuleren.IsEnabled = false;
+            }
+        }
+
+        // Verwijdert de geselecteerde afspraak uit de databank en herlaadt de lijst
+        private void BtnAnnuleren_Click(object sender, RoutedEventArgs e)
+        {
+            if (geselecteerdeAfspraak == null) return;
+
+            TxtFout.Visibility = Visibility.Collapsed;
+            try
+            {
+                geselecteerdeAfspraak.Verwijderen();
+                LaadAlleAfspraken();
+                ToonGefilterdeLijst();
+            }
+            catch (Exception fout)
+            {
+                TxtFout.Text = "Fout bij het annuleren van de afspraak: " + fout.Message;
+                TxtFout.Visibility = Visibility.Visible;
+            }
+        }
+
+        // Herfilter de lijst wanneer een andere radioknop geselecteerd wordt
+        private void RdoFilter_Checked(object sender, RoutedEventArgs e)
+        {
+            // alleAfspraken is null zolang de pagina nog niet volledig geladen is
+            if (alleAfspraken == null) return;
+            ToonGefilterdeLijst();
         }
 
         // Navigeer naar de afspraak-boekenpagina en geef de ingelogde patiënt mee
         private void BtnNieuweAfspraak_Click(object sender, RoutedEventArgs e)
         {
             NavigationService.Navigate(new AfspraakBoekenPagina(aangemeldePatient));
-        }
-
-        // Navigeer naar de profielpagina van de ingelogde patiënt
-        private void BtnProfiel_Click(object sender, RoutedEventArgs e)
-        {
-            NavigationService.Navigate(new ProfielPagina(aangemeldePatient));
-        }
-
-        // Keer terug naar de inlogpagina en wis de navigatiegeschiedenis
-        private void BtnUitloggen_Click(object sender, RoutedEventArgs e)
-        {
-            NavigationService.Navigate(new InlogPagina());
-            NavigationService.RemoveBackEntry();
         }
     }
 }

@@ -6,47 +6,75 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Bovenbalk met naam van de patiënt en navigatieknoppen -->
-        <Border Grid.Row="0" Background="#2E7D32" Padding="24,16">
+        <!-- Paginatitel en knop voor nieuwe afspraak -->
+        <Border Grid.Row="0" Background="White" BorderBrush="#E0E0E0"
+                BorderThickness="0,0,0,1" Padding="24,16">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <TextBlock x:Name="TxtPatientNaam" FontSize="20" FontWeight="Bold" Foreground="White"/>
-                    <TextBlock Text="Uw afspraken" FontSize="13" Foreground="#C8E6C9"/>
-                </StackPanel>
+                <TextBlock Grid.Column="0" Text="Mijn afspraken" FontSize="20"
+                           FontWeight="Bold" Foreground="#212121" VerticalAlignment="Center"/>
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button x:Name="BtnNieuweAfspraak" Content="+ Nieuwe afspraak"
-                            Padding="14,8" Margin="0,0,8,0" Cursor="Hand"
-                            Background="#66BB6A" Foreground="White" BorderThickness="0"
-                            Click="BtnNieuweAfspraak_Click"/>
-                    <Button x:Name="BtnProfiel" Content="Mijn profiel"
-                            Padding="14,8" Margin="0,0,8,0" Cursor="Hand"
-                            Background="#43A047" Foreground="White" BorderThickness="0"
-                            Click="BtnProfiel_Click"/>
-                    <Button x:Name="BtnUitloggen" Content="Uitloggen"
-                            Padding="14,8" Cursor="Hand"
-                            Background="#1B5E20" Foreground="White" BorderThickness="0"
-                            Click="BtnUitloggen_Click"/>
-                </StackPanel>
+                <Button Grid.Column="1" x:Name="BtnNieuweAfspraak" Content="+ Nieuwe afspraak"
+                        Padding="14,8" Cursor="Hand"
+                        Background="#43A047" Foreground="White" BorderThickness="0"
+                        Click="BtnNieuweAfspraak_Click"/>
             </Grid>
         </Border>
 
-        <!-- Afspraken (dynamisch gegenereerde kaarten) -->
-        <ScrollViewer Grid.Row="1" Margin="24,16,24,0" VerticalScrollBarVisibility="Auto">
-            <StackPanel x:Name="PnlAfspraken"/>
+        <!-- Filterbalk: radiobuttons links, annulerknop rechts -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#E0E0E0"
+                BorderThickness="0,0,0,1" Padding="24,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Checked-event zorgt voor herfiltering van de lijst -->
+                    <RadioButton x:Name="RdoAlleAfspraken" Content="Alle afspraken"
+                                 IsChecked="True" FontSize="13" Foreground="#37474F"
+                                 VerticalContentAlignment="Center" Margin="0,0,24,0"
+                                 Checked="RdoFilter_Checked"/>
+                    <RadioButton x:Name="RdoToekomstige" Content="Enkel toekomstige afspraken"
+                                 FontSize="13" Foreground="#37474F"
+                                 VerticalContentAlignment="Center"
+                                 Checked="RdoFilter_Checked"/>
+                </StackPanel>
+
+                <!-- Alleen actief wanneer een toekomstige afspraak geselecteerd is -->
+                <Button x:Name="BtnAnnuleren" Grid.Column="1" Content="Afspraak annuleren"
+                        IsEnabled="False" Padding="14,7" FontSize="13"
+                        Background="#D32F2F" Foreground="White" BorderThickness="0"
+                        Cursor="Hand" Click="BtnAnnuleren_Click"/>
+            </Grid>
+        </Border>
+
+        <!-- Lijst van afsprakenkaaarten; interne scroll uitgeschakeld (buitenste ScrollViewer scrollt) -->
+        <ScrollViewer Grid.Row="2" Margin="24,16,24,0" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock x:Name="TxtGeenAfspraken" FontSize="14"
+                           Foreground="#90A4AE" HorizontalAlignment="Center"
+                           Margin="0,40,0,0" Visibility="Collapsed"/>
+                <ListBox x:Name="LstAfspraken"
+                         Background="Transparent" BorderThickness="0"
+                         ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         SelectionChanged="LstAfspraken_SelectionChanged"/>
+            </StackPanel>
         </ScrollViewer>
 
         <!-- Foutmelding -->
-        <TextBlock x:Name="TxtFout" Grid.Row="2" Foreground="#D32F2F" FontSize="13"
+        <TextBlock x:Name="TxtFout" Grid.Row="3" Foreground="#D32F2F" FontSize="13"
                    Margin="24,8,24,16" TextWrapping="Wrap" Visibility="Collapsed"/>
     </Grid>
 </Page>

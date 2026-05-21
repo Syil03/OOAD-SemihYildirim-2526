@@ -10,15 +10,16 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Bovenbalk met terugknop -->
-        <Border Grid.Row="0" Background="#1B2A4A" Padding="20,14">
+        <!-- Paginatitel met terugknop -->
+        <Border Grid.Row="0" Background="White" BorderBrush="#E0E0E0"
+                BorderThickness="0,0,0,1" Padding="20,14">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <Button Content="← Terug" Click="BtnTerug_Click"
-                        Background="Transparent" Foreground="White"
-                        BorderBrush="White" BorderThickness="1"
+                        Background="Transparent" Foreground="#1B2A4A"
+                        BorderBrush="#1B2A4A" BorderThickness="1"
                         Padding="10,5" Cursor="Hand" Margin="0,0,20,0"/>
                 <TextBlock Text="Afspraakdetails" FontSize="20" FontWeight="Bold"
-                           Foreground="White" VerticalAlignment="Center"/>
+                           Foreground="#212121" VerticalAlignment="Center"/>
             </StackPanel>
         </Border>
 

@@ -34,6 +34,52 @@
         <ScrollViewer Grid.Row="1" Margin="24,16,24,0" VerticalScrollBarVisibility="Auto">
             <StackPanel MaxWidth="640" HorizontalAlignment="Left">
 
+                <!-- Sectie: Dokter kiezen (staat bovenaan zodat de patiënt eerst een arts kiest) -->
+                <Border Background="White" BorderBrush="#CFD8DC" BorderThickness="1"
+                        CornerRadius="6" Padding="20" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="Kies een dokter"
+                                   FontSize="16" FontWeight="SemiBold"
+                                   Foreground="#1B5E20" Margin="0,0,0,12"/>
+                        <TextBlock Text="Selecteer de gewenste arts:"
+                                   FontSize="13" Foreground="#546E7A" Margin="0,0,0,6"/>
+                        <!-- SelectionChanged vult het infopaneel hieronder -->
+                        <ComboBox x:Name="CmbDokter" Width="320" HorizontalAlignment="Left"
+                                  Padding="8,6" FontSize="14" Margin="0,0,0,12"
+                                  SelectionChanged="CmbDokter_SelectionChanged"/>
+
+                        <!-- Infopaneel: verborgen totdat een dokter geselecteerd is -->
+                        <Border x:Name="PnlDokterInfo" Visibility="Collapsed"
+                                Background="#F1F8E9" BorderBrush="#C8E6C9" BorderThickness="1"
+                                CornerRadius="6" Padding="14">
+                            <StackPanel Orientation="Horizontal">
+                                <!-- Profielfoto of initialen-cirkel van de geselecteerde dokter -->
+                                <Grid Width="64" Height="64" Margin="0,0,16,0" VerticalAlignment="Center">
+                                    <Image x:Name="ImgDokterFoto" Width="64" Height="64"
+                                           Stretch="UniformToFill" Visibility="Collapsed"/>
+                                    <Grid x:Name="PnlDokterInitialen">
+                                        <Ellipse Width="64" Height="64" Fill="#1B2A4A"/>
+                                        <TextBlock x:Name="TxtDokterInitialen"
+                                                   FontSize="20" FontWeight="Bold"
+                                                   Foreground="White"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Grid>
+                                </Grid>
+                                <!-- Naam, e-mailadres en gsm van de geselecteerde dokter -->
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock x:Name="TxtDokterNaam" FontSize="15" FontWeight="SemiBold"
+                                               Foreground="#1B2A4A" Margin="0,0,0,4"/>
+                                    <TextBlock x:Name="TxtDokterEmail" FontSize="13"
+                                               Foreground="#546E7A" Margin="0,0,0,2"/>
+                                    <TextBlock x:Name="TxtDokterGsm" FontSize="13"
+                                               Foreground="#90A4AE"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
                 <!-- Sectie: Datum en tijdstip -->
                 <Border Background="White" BorderBrush="#CFD8DC" BorderThickness="1"
                         CornerRadius="6" Padding="20" Margin="0,0,0,16">
@@ -68,21 +114,6 @@
                                  AcceptsReturn="True" TextWrapping="Wrap"
                                  VerticalScrollBarVisibility="Auto"
                                  Padding="8,6" FontSize="14" BorderBrush="#B0BEC5"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Sectie: Dokter kiezen -->
-                <Border Background="White" BorderBrush="#CFD8DC" BorderThickness="1"
-                        CornerRadius="6" Padding="20" Margin="0,0,0,20">
-                    <StackPanel>
-                        <TextBlock Text="Kies een dokter"
-                                   FontSize="16" FontWeight="SemiBold"
-                                   Foreground="#1B5E20" Margin="0,0,0,12"/>
-                        <TextBlock Text="Selecteer de gewenste arts:"
-                                   FontSize="13" Foreground="#546E7A" Margin="0,0,0,6"/>
-                        <!-- Items worden dynamisch geladen vanuit de databank -->
-                        <ComboBox x:Name="CmbDokter" Width="320" HorizontalAlignment="Left"
-                                  Padding="8,6" FontSize="14"/>
                     </StackPanel>
                 </Border>
 

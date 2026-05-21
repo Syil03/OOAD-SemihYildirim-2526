@@ -1,12 +1,13 @@
 using DokterspraktijkLib.Helpers;
 using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace DokterspraktijkLib.Models
 {
     // Klasse die een arts in de praktijk vertegenwoordigt
     public class Dokter : Persoon
     {
-        public string RizivNummer { get; set; } = string.Empty;
+        public int RizivNummer { get; set; }
         public bool IsGeconventioneerd { get; set; }
 
         // Zoekt een dokter op in de databank via e-mail en wachtwoord (SHA256)
@@ -173,10 +174,11 @@ namespace DokterspraktijkLib.Models
             opdracht.Parameters.AddWithValue("@gsm", Gsm);
             opdracht.Parameters.AddWithValue("@email", Email);
             opdracht.Parameters.AddWithValue("@paswoord", Paswoord);
-            if (ProfielFotoData != null)
-                opdracht.Parameters.AddWithValue("@profielfotodata", ProfielFotoData);
-            else
-                opdracht.Parameters.AddWithValue("@profielfotodata", DBNull.Value);
+            // SqlDbType.Image is verplicht: AddWithValue leidt bij DBNull.Value het type
+            // af als nvarchar, wat een "type clash: nvarchar incompatible with image" geeft
+            SqlParameter fotoParam = new SqlParameter("@profielfotodata", SqlDbType.Image);
+            fotoParam.Value = (ProfielFotoData != null) ? (object)ProfielFotoData : DBNull.Value;
+            opdracht.Parameters.Add(fotoParam);
             opdracht.Parameters.AddWithValue("@rizivnummer", RizivNummer);
             opdracht.Parameters.AddWithValue("@isgeconventioneerd", IsGeconventioneerd);
         }
@@ -208,8 +210,8 @@ namespace DokterspraktijkLib.Models
             int idxPaswoord = lezer.GetOrdinal("paswoord");
             dokter.Paswoord = lezer.IsDBNull(idxPaswoord) ? "" : lezer.GetString(idxPaswoord);
 
-            // rizivnummer is een int in de databank; uitlezen met GetInt32 en omzetten naar string
-            dokter.RizivNummer = lezer.GetInt32(lezer.GetOrdinal("rizivnummer")).ToString();
+            // rizivnummer is een int in de databank; rechtstreeks uitlezen met GetInt32
+            dokter.RizivNummer = lezer.GetInt32(lezer.GetOrdinal("rizivnummer"));
             // isgeconventioneerd is een tinyint (byte); uitlezen met GetByte en omzetten naar bool
             dokter.IsGeconventioneerd = lezer.GetByte(lezer.GetOrdinal("isgeconventioneerd")) != 0;
 
