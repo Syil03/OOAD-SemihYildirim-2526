@@ -114,39 +114,10 @@ namespace DokterApp.Pages
             TxtGeenAfspraken.Visibility = Visibility.Collapsed;
             LstAfspraken.Visibility = Visibility.Visible;
 
-            // Voeg per afspraak een ListBoxItem toe met tijdstip en patiëntnaam
+            // Voeg per afspraak een kaartje toe met patiëntnaam, tijdstip en klacht
             for (int i = 0; i < gefilterd.Count; i++)
             {
-                ListBoxItem item = new ListBoxItem();
-                item.Tag = gefilterd[i];
-                item.Padding = new Thickness(12, 10, 12, 10);
-
-                // Twee kolommen: tijdstip links, naam rechts
-                Grid rij = new Grid();
-                rij.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(56) });
-                rij.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-                TextBlock txtTijd = new TextBlock();
-                txtTijd.Text = gefilterd[i].Moment.ToString("HH:mm");
-                txtTijd.FontSize = 14;
-                txtTijd.FontWeight = FontWeights.SemiBold;
-                txtTijd.Foreground = new SolidColorBrush(Color.FromRgb(27, 42, 74));
-                txtTijd.VerticalAlignment = VerticalAlignment.Center;
-
-                TextBlock txtNaam = new TextBlock();
-                txtNaam.Text = gefilterd[i].PatientNaam;
-                txtNaam.FontSize = 14;
-                txtNaam.Foreground = new SolidColorBrush(Color.FromRgb(33, 33, 33));
-                txtNaam.VerticalAlignment = VerticalAlignment.Center;
-                txtNaam.TextTrimming = TextTrimming.CharacterEllipsis;
-
-                Grid.SetColumn(txtTijd, 0);
-                Grid.SetColumn(txtNaam, 1);
-                rij.Children.Add(txtTijd);
-                rij.Children.Add(txtNaam);
-
-                item.Content = rij;
-                LstAfspraken.Items.Add(item);
+                MaakAfspraakItem(gefilterd[i]);
             }
         }
 
@@ -174,8 +145,6 @@ namespace DokterApp.Pages
 
             ListBoxItem geselecteerdItem = (ListBoxItem)LstAfspraken.SelectedItem;
             geselecteerdeAfspraak = (Afspraak)geselecteerdItem.Tag;
-
-            TxtKlacht.Text = geselecteerdeAfspraak.Klacht;
 
             // Knop expliciet in- of uitschakelen op basis van het tijdstip van de afspraak
             if (geselecteerdeAfspraak.Moment > DateTime.Now)
@@ -213,6 +182,72 @@ namespace DokterApp.Pages
                 TxtFout.Text = "Fout bij het annuleren van de afspraak: " + fout.Message;
                 TxtFout.Visibility = Visibility.Visible;
             }
+        }
+
+        // Bouwt een klikbaar ListBoxItem voor één afspraak; het Afspraak-object zit in Tag
+        private void MaakAfspraakItem(Afspraak afspraak)
+        {
+            ListBoxItem item = new ListBoxItem();
+            item.Tag = afspraak;
+            item.Padding = new Thickness(0);
+            // Zorg dat het item de volledige breedte van de ListBox inneemt
+            item.HorizontalContentAlignment = HorizontalAlignment.Stretch;
+
+            Border kaart = new Border();
+            kaart.Background = Brushes.White;
+            kaart.BorderBrush = new SolidColorBrush(Color.FromRgb(220, 225, 230));
+            kaart.BorderThickness = new Thickness(1);
+            kaart.CornerRadius = new CornerRadius(6);
+            kaart.Margin = new Thickness(0, 0, 0, 8);
+            kaart.Padding = new Thickness(16, 12, 16, 12);
+
+            // Twee rijen: bovenste rij (naam + tijdstip), onderste rij (klacht in grijs)
+            Grid inhoud = new Grid();
+            inhoud.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            inhoud.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+            // Bovenste rij: patiëntnaam links (vet) en tijdstip rechts
+            Grid bovenste = new Grid();
+            bovenste.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            bovenste.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            bovenste.Margin = new Thickness(0, 0, 0, 6);
+
+            TextBlock txtNaam = new TextBlock();
+            txtNaam.Text = afspraak.PatientNaam;
+            txtNaam.FontSize = 14;
+            txtNaam.FontWeight = FontWeights.Bold;
+            txtNaam.Foreground = new SolidColorBrush(Color.FromRgb(33, 33, 33));
+            txtNaam.VerticalAlignment = VerticalAlignment.Center;
+            txtNaam.TextTrimming = TextTrimming.CharacterEllipsis;
+
+            TextBlock txtTijd = new TextBlock();
+            txtTijd.Text = afspraak.Moment.ToString("HH:mm");
+            txtTijd.FontSize = 14;
+            txtTijd.FontWeight = FontWeights.SemiBold;
+            txtTijd.Foreground = new SolidColorBrush(Color.FromRgb(27, 42, 74));
+            txtTijd.VerticalAlignment = VerticalAlignment.Center;
+            txtTijd.Margin = new Thickness(12, 0, 0, 0);
+
+            Grid.SetColumn(txtNaam, 0);
+            Grid.SetColumn(txtTijd, 1);
+            bovenste.Children.Add(txtNaam);
+            bovenste.Children.Add(txtTijd);
+
+            // Onderste rij: reden van consultatie in grijs
+            TextBlock txtKlacht = new TextBlock();
+            txtKlacht.Text = afspraak.Klacht;
+            txtKlacht.FontSize = 12;
+            txtKlacht.Foreground = new SolidColorBrush(Color.FromRgb(120, 144, 156));
+            txtKlacht.TextWrapping = TextWrapping.Wrap;
+
+            Grid.SetRow(bovenste, 0);
+            Grid.SetRow(txtKlacht, 1);
+            inhoud.Children.Add(bovenste);
+            inhoud.Children.Add(txtKlacht);
+
+            kaart.Child = inhoud;
+            item.Content = kaart;
+            LstAfspraken.Items.Add(item);
         }
 
         // Bouwt twee initialen op uit de voor- en achternaam (eerste letter van elk deel)

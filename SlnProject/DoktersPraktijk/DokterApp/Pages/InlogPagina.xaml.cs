@@ -8,6 +8,9 @@ namespace DokterApp.Pages
 {
     public partial class InlogPagina : Page
     {
+        // Bijhoudt of het wachtwoord momenteel als leesbare tekst getoond wordt
+        private bool paswooordZichtbaar = false;
+
         public InlogPagina()
         {
             InitializeComponent();
@@ -19,6 +22,30 @@ namespace DokterApp.Pages
             if (e.Key == Key.Enter)
             {
                 Inloggen();
+            }
+        }
+
+        // Wisselt de zichtbaarheid van het wachtwoord:
+        // PasswordBox ↔ TextBox zodat de gebruiker de invoer kan controleren
+        private void BtnOogje_Click(object sender, RoutedEventArgs e)
+        {
+            paswooordZichtbaar = !paswooordZichtbaar;
+
+            if (paswooordZichtbaar)
+            {
+                // Kopieer de ingevoerde waarde naar de TextBox en toon die
+                TxtPaswooordZichtbaar.Text = TxtPaswoord.Password;
+                TxtPaswoord.Visibility = Visibility.Collapsed;
+                TxtPaswooordZichtbaar.Visibility = Visibility.Visible;
+                TxtPaswooordZichtbaar.Focus();
+            }
+            else
+            {
+                // Kopieer de ingevoerde waarde terug naar de PasswordBox en verberg de TextBox
+                TxtPaswoord.Password = TxtPaswooordZichtbaar.Text;
+                TxtPaswooordZichtbaar.Visibility = Visibility.Collapsed;
+                TxtPaswoord.Visibility = Visibility.Visible;
+                TxtPaswoord.Focus();
             }
         }
 
@@ -34,7 +61,8 @@ namespace DokterApp.Pages
             TxtFout.Text = string.Empty;
 
             string email = TxtEmail.Text.Trim();
-            string paswoord = TxtPaswoord.Password;
+            // Haal het wachtwoord op uit het momenteel zichtbare veld
+            string paswoord = paswooordZichtbaar ? TxtPaswooordZichtbaar.Text : TxtPaswoord.Password;
 
             // Invoervalidatie
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(paswoord))

@@ -15,10 +15,11 @@ namespace DokterApp.Pages
         {
             InitializeComponent();
             aangemeldeDokter = dokter;
+            // Loaded vuurt bij eerste weergave én bij terugkeer vanuit een detail-pagina,
+            // zodat de lijst na opslaan, wijzigen of verwijderen altijd vernieuwd is
             Loaded += PatientenPagina_Loaded;
         }
 
-        // Herlaad de patiëntenlijst zodra de pagina zichtbaar is
         private void PatientenPagina_Loaded(object sender, RoutedEventArgs e)
         {
             LaadAllePatient();
@@ -317,5 +318,19 @@ namespace DokterApp.Pages
             LaadAllePatient();
         }
 
+        // Wist de zoekterm en herlaadt de volledige lijst; aangeroepen vanuit PatientDetailPagina
+        // nadat een nieuwe patiënt opgeslagen is, zodat de lijst altijd up-to-date is
+        public void HerlaadLijst()
+        {
+            TxtZoeken.Text = string.Empty;
+            LaadAllePatient();
+        }
+
+        // Navigeert naar het formulier voor een nieuwe patiënt (patient == null → INSERT-modus);
+        // geeft een referentie naar deze pagina mee zodat de lijst na opslaan herladen kan worden
+        private void BtnNieuwePatient_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationService.Navigate(new PatientDetailPagina(null, aangemeldeDokter, true, this));
+        }
     }
 }

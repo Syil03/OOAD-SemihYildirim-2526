@@ -59,17 +59,20 @@
             </Grid>
         </Border>
 
-        <!-- Lijst van afsprakenkaaarten; interne scroll uitgeschakeld (buitenste ScrollViewer scrollt) -->
-        <ScrollViewer Grid.Row="2" Margin="24,16,24,0" VerticalScrollBarVisibility="Auto">
+        <!-- Lijst van afspraakkaarten; muiswiel-events worden via PreviewMouseWheel doorgestuurd -->
+        <ScrollViewer x:Name="ScrAfspraken" Grid.Row="2" Margin="24,16,24,0"
+                      VerticalScrollBarVisibility="Auto">
             <StackPanel>
                 <TextBlock x:Name="TxtGeenAfspraken" FontSize="14"
                            Foreground="#90A4AE" HorizontalAlignment="Center"
                            Margin="0,40,0,0" Visibility="Collapsed"/>
                 <ListBox x:Name="LstAfspraken"
                          Background="Transparent" BorderThickness="0"
+                         HorizontalContentAlignment="Stretch"
                          ScrollViewer.VerticalScrollBarVisibility="Disabled"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                         SelectionChanged="LstAfspraken_SelectionChanged"/>
+                         SelectionChanged="LstAfspraken_SelectionChanged"
+                         PreviewMouseWheel="LstAfspraken_PreviewMouseWheel"/>
             </StackPanel>
         </ScrollViewer>
 

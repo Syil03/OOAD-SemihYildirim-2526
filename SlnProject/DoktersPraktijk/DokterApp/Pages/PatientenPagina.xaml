@@ -17,10 +17,11 @@
             <TextBlock Text="Patiënten" FontSize="20" FontWeight="Bold" Foreground="#212121"/>
         </Border>
 
-        <!-- Zoekbalk -->
+        <!-- Zoekbalk met knop voor nieuwe patiënt -->
         <Grid Grid.Row="1" Margin="28,18,28,14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
@@ -37,6 +38,11 @@
                     Height="38" Padding="16,0" Margin="8,0,0,0"
                     Background="#ECEFF1" Foreground="#546E7A" BorderThickness="0"
                     Cursor="Hand" Click="BtnAllePatient_Click"/>
+            <!-- Groene knop om een nieuwe patiënt toe te voegen -->
+            <Button x:Name="BtnNieuwePatient" Grid.Column="3" Content="+ Nieuwe patiënt"
+                    Height="38" Padding="16,0" Margin="8,0,0,0"
+                    Background="#43A047" Foreground="White" BorderThickness="0"
+                    Cursor="Hand" Click="BtnNieuwePatient_Click"/>
         </Grid>
 
         <!-- Patiëntenkaarten (dynamisch gevuld via code-behind, SlnDemoItemsGrid-patroon) -->

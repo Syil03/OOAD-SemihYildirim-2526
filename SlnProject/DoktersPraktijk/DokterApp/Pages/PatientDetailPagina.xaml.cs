@@ -8,26 +8,59 @@ using System.Windows.Media.Imaging;
 
 namespace DokterApp.Pages
 {
-    // Toont de gegevens van één patiënt en laat de dokter die ook bewerken
+    // Toont de gegevens van één patiënt en laat de dokter die bewerken of een nieuwe aanmaken
     public partial class PatientDetailPagina : Page
     {
         private Patient huidigePatiënt;
         private Dokter aangemeldeDokter;
 
-        // bewerkModus = true opent meteen het bewerkformulier
-        public PatientDetailPagina(Patient patient, Dokter dokter, bool bewerkModus)
+        // true als er geen bestaande patiënt meegegeven is (nieuw-aanmaken-modus)
+        private bool isNieuwePatiënt;
+
+        // Referentie naar de lijst-pagina waarvandaan genavigeerd werd;
+        // wordt gebruikt om de lijst te herladen na het opslaan van een nieuwe patiënt
+        private PatientenPagina bronLijstPagina;
+
+        // bewerkModus = true opent meteen het bewerkformulier voor een bestaande patiënt;
+        // patient = null schakelt naar de modus "nieuwe patiënt toevoegen";
+        // bron = de PatientenPagina die herladen moet worden na opslaan van een nieuwe patiënt
+        public PatientDetailPagina(Patient patient, Dokter dokter, bool bewerkModus, PatientenPagina bron = null)
         {
             InitializeComponent();
-            huidigePatiënt = patient;
             aangemeldeDokter = dokter;
+            bronLijstPagina = bron;
 
-            VulLeesVeldenIn();
-
-            if (bewerkModus)
+            if (patient == null)
             {
-                VulBewerkVeldenIn();
+                // Nieuwe patiënt: maak een leeg object aan (Id blijft 0 → INSERT bij Opslaan)
+                huidigePatiënt = new Patient();
+                isNieuwePatiënt = true;
+
+                // Titels aanpassen voor de aanmaakmodus
+                TxtPaginaTitel.Text = "Nieuwe patiënt";
+                TxtBewerkTitel.Text = "Nieuwe patiënt toevoegen";
+
+                // Wachtwoordveld tonen (alleen vereist bij aanmaken)
+                LblWachtwoord.Visibility = Visibility.Visible;
+                TxtBewerkWachtwoord.Visibility = Visibility.Visible;
+
+                // Leesweergave overslaan; direct het formulier tonen
                 PnlLeesWeergave.Visibility = Visibility.Collapsed;
                 PnlBewerkWeergave.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                huidigePatiënt = patient;
+                isNieuwePatiënt = false;
+
+                VulLeesVeldenIn();
+
+                if (bewerkModus)
+                {
+                    VulBewerkVeldenIn();
+                    PnlLeesWeergave.Visibility = Visibility.Collapsed;
+                    PnlBewerkWeergave.Visibility = Visibility.Visible;
+                }
             }
         }
 
@@ -103,7 +136,7 @@ namespace DokterApp.Pages
             PnlBewerkWeergave.Visibility = Visibility.Visible;
         }
 
-        // Valideert het formulier, slaat de gegevens op en keert terug naar de leesweergave
+        // Valideert het formulier, slaat de gegevens op en keert terug of toont de leesweergave
         private void BtnOpslaan_Click(object sender, RoutedEventArgs e)
         {
             TxtFoutBewerken.Visibility = Visibility.Collapsed;
@@ -113,7 +146,7 @@ namespace DokterApp.Pages
             string email = TxtBewerkEmail.Text.Trim();
             string gsm = TxtBewerkGsm.Text.Trim();
 
-            // Validatie
+            // Validatie gemeenschappelijke velden
             if (voornaam.Length == 0)
             {
                 ToonFoutBewerken("Voornaam mag niet leeg zijn.");
@@ -143,6 +176,19 @@ namespace DokterApp.Pages
             {
                 ToonFoutBewerken("Selecteer een notificatievoorkeur.");
                 return;
+            }
+
+            // Wachtwoord valideren en hashen bij aanmaken nieuwe patiënt
+            if (isNieuwePatiënt)
+            {
+                string paswoord = TxtBewerkWachtwoord.Password;
+                if (paswoord.Length == 0)
+                {
+                    ToonFoutBewerken("Wachtwoord mag niet leeg zijn.");
+                    return;
+                }
+                // Hash opslaan in het patiëntobject; Opslaan() schrijft dit naar de databank
+                huidigePatiënt.Paswoord = Persoon.HashPaswoord(paswoord);
             }
 
             // Geboortedatum parsen via try-catch (geen out-parameter)
@@ -177,13 +223,26 @@ namespace DokterApp.Pages
 
             try
             {
+                // Id == 0 → INSERT; Id > 0 → UPDATE (zie Patient.Opslaan)
                 huidigePatiënt.Opslaan();
 
-                // Ververs de leesweergave met de zojuist opgeslagen gegevens
-                VulLeesVeldenIn();
-
-                PnlBewerkWeergave.Visibility = Visibility.Collapsed;
-                PnlLeesWeergave.Visibility = Visibility.Visible;
+                if (isNieuwePatiënt)
+                {
+                    // Herlaad de lijst in de bronpagina vóór GoBack() zodat de nieuwe patiënt
+                    // zichtbaar is ongeacht of het Loaded-event al dan niet opnieuw afvuurt
+                    if (bronLijstPagina != null)
+                    {
+                        bronLijstPagina.HerlaadLijst();
+                    }
+                    NavigationService.GoBack();
+                }
+                else
+                {
+                    // Ververs de leesweergave met de zojuist opgeslagen gegevens
+                    VulLeesVeldenIn();
+                    PnlBewerkWeergave.Visibility = Visibility.Collapsed;
+                    PnlLeesWeergave.Visibility = Visibility.Visible;
+                }
             }
             catch (Exception fout)
             {
@@ -191,12 +250,19 @@ namespace DokterApp.Pages
             }
         }
 
-        // Annuleert de bewerking en keert terug naar de leesweergave zonder op te slaan
+        // Annuleert de bewerking: voor nieuwe patiënt → terug naar lijst; anders → leesweergave
         private void BtnAnnuleren_Click(object sender, RoutedEventArgs e)
         {
             TxtFoutBewerken.Visibility = Visibility.Collapsed;
-            PnlBewerkWeergave.Visibility = Visibility.Collapsed;
-            PnlLeesWeergave.Visibility = Visibility.Visible;
+            if (isNieuwePatiënt)
+            {
+                NavigationService.GoBack();
+            }
+            else
+            {
+                PnlBewerkWeergave.Visibility = Visibility.Collapsed;
+                PnlLeesWeergave.Visibility = Visibility.Visible;
+            }
         }
 
         // Gaat terug naar de patiëntenlijst

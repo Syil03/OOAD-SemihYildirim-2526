@@ -43,35 +43,28 @@
                            FontSize="13" Foreground="#90A4AE"
                            Margin="0,0,0,10" Visibility="Collapsed"/>
 
-                <!-- Lijst van afspraken: elk item toont tijdstip en naam van de patiënt -->
+                <!-- Lijst van afspraken: elk item toont patiëntnaam, tijdstip en klacht -->
                 <ListBox x:Name="LstAfspraken"
-                         Height="180"
-                         BorderBrush="#CFD8DC" BorderThickness="1"
-                         Background="White"
+                         MaxHeight="340"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         HorizontalContentAlignment="Stretch"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
                          Visibility="Collapsed"
                          SelectionChanged="LstAfspraken_SelectionChanged"
-                         Margin="0,0,0,16"/>
+                         Margin="0,0,0,12"/>
 
-                <!-- Detailpaneel: zichtbaar bij selectie van een afspraak -->
+                <!-- Detailpaneel: zichtbaar bij selectie van een toekomstige afspraak -->
                 <Border x:Name="PnlDetail"
                         Visibility="Collapsed"
-                        Background="White" CornerRadius="6" Padding="16,14"
-                        BorderBrush="#CFD8DC" BorderThickness="1">
-                    <StackPanel>
-                        <TextBlock Text="REDEN VAN CONSULTATIE" FontSize="11"
-                                   FontWeight="SemiBold" Foreground="#7F90AE"
-                                   Margin="0,0,0,6"/>
-                        <TextBlock x:Name="TxtKlacht" FontSize="14"
-                                   Foreground="#37474F" TextWrapping="Wrap"
-                                   Margin="0,0,0,16"/>
-                        <!-- Knop is uitgeschakeld voor afspraken in het verleden -->
-                        <Button x:Name="BtnAnnuleren" Content="Afspraak annuleren"
-                                Padding="14,8" Background="#D32F2F" Foreground="White"
-                                BorderThickness="0" Cursor="Hand"
-                                HorizontalAlignment="Left"
-                                Click="BtnAnnuleren_Click"/>
-                    </StackPanel>
+                        Background="White" CornerRadius="6" Padding="16,12"
+                        BorderBrush="#DCE1E6" BorderThickness="1">
+                    <!-- Knop is uitgeschakeld voor afspraken in het verleden -->
+                    <Button x:Name="BtnAnnuleren" Content="Afspraak annuleren"
+                            Padding="14,8" Background="#D32F2F" Foreground="White"
+                            BorderThickness="0" Cursor="Hand"
+                            HorizontalAlignment="Left"
+                            Click="BtnAnnuleren_Click"/>
                 </Border>
             </StackPanel>
 

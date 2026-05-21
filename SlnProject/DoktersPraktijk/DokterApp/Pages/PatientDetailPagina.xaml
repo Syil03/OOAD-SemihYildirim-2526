@@ -18,8 +18,8 @@
                         Background="Transparent" Foreground="#1B2A4A"
                         BorderBrush="#1B2A4A" BorderThickness="1"
                         Padding="10,5" Cursor="Hand" Margin="0,0,20,0"/>
-                <TextBlock Text="Patiëntdetails" FontSize="20" FontWeight="Bold"
-                           Foreground="#212121" VerticalAlignment="Center"/>
+                <TextBlock x:Name="TxtPaginaTitel" Text="Patiëntdetails" FontSize="20"
+                           FontWeight="Bold" Foreground="#212121" VerticalAlignment="Center"/>
             </StackPanel>
         </Border>
 
@@ -120,8 +120,8 @@
                     <DropShadowEffect BlurRadius="20" ShadowDepth="2" Opacity="0.12"/>
                 </Border.Effect>
                 <StackPanel>
-                    <TextBlock Text="Gegevens bewerken" FontSize="20" FontWeight="Bold"
-                               Foreground="#212121" Margin="0,0,0,24"/>
+                    <TextBlock x:Name="TxtBewerkTitel" Text="Gegevens bewerken" FontSize="20"
+                               FontWeight="Bold" Foreground="#212121" Margin="0,0,0,24"/>
 
                     <!-- Voornaam -->
                     <TextBlock Text="Voornaam" FontSize="13" Foreground="#37474F" Margin="0,0,0,4"/>
@@ -140,6 +140,13 @@
                     <TextBox x:Name="TxtBewerkEmail" Height="40" Padding="10,0" FontSize="14"
                              VerticalContentAlignment="Center"
                              BorderBrush="#CFD8DC" BorderThickness="1" Margin="0,0,0,16"/>
+
+                    <!-- Wachtwoord: alleen zichtbaar bij aanmaken van een nieuwe patiënt -->
+                    <TextBlock x:Name="LblWachtwoord" Text="Wachtwoord" FontSize="13"
+                               Foreground="#37474F" Margin="0,0,0,4" Visibility="Collapsed"/>
+                    <PasswordBox x:Name="TxtBewerkWachtwoord" Height="40" Padding="10,11"
+                                 FontSize="14" BorderBrush="#CFD8DC" BorderThickness="1"
+                                 Margin="0,0,0,16" Visibility="Collapsed"/>
 
                     <!-- Gsm-nummer -->
                     <TextBlock Text="Gsm-nummer (max. 10 tekens)" FontSize="13" Foreground="#37474F" Margin="0,0,0,4"/>

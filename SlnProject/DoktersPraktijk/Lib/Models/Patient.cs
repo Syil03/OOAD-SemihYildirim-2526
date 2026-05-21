@@ -76,7 +76,10 @@ namespace DokterspraktijkLib.Models
             return gevondenPatient;
         }
 
-        // Geeft alle patiënten terug die minstens één afspraak hebben bij de opgegeven dokter
+        // Geeft alle patiënten in het systeem terug, gesorteerd op achternaam en voornaam.
+        // De parameter dokterId wordt bewaard voor compatibiliteit maar niet meer als filter gebruikt:
+        // een dokter in de praktijk heeft toegang tot alle patiënten, ook nieuw aangemaakte
+        // zonder afspraken. Zo gedraagt deze methode zich identiek aan Zoeken().
         public static List<Patient> GeefAllePatientenVanDokter(int dokterId)
         {
             List<Patient> patienten = new List<Patient>();
@@ -85,16 +88,12 @@ namespace DokterspraktijkLib.Models
                 using (SqlConnection verbinding = DatabaseHelper.GetConnection())
                 {
                     verbinding.Open();
-                    // Subquery i.p.v. JOIN: een JOIN geeft één rij per afspraak en
-                    // zou elke patiënt zo vaak tonen als hij afspraken heeft bij deze dokter
                     string sql = "SELECT id, voornaam, achternaam, geslacht, gsm, email, " +
                                  "paswoord, geboortedatum, profielfotodata, notificaties " +
                                  "FROM Patient " +
-                                 "WHERE id IN (SELECT patient_id FROM Afspraak WHERE dokter_id = @dokterId) " +
                                  "ORDER BY achternaam, voornaam";
                     using (SqlCommand opdracht = new SqlCommand(sql, verbinding))
                     {
-                        opdracht.Parameters.AddWithValue("@dokterId", dokterId);
                         using (SqlDataReader lezer = opdracht.ExecuteReader())
                         {
                             while (lezer.Read())
@@ -107,12 +106,13 @@ namespace DokterspraktijkLib.Models
             }
             catch (Exception fout)
             {
-                throw new Exception("Fout bij ophalen patiënten van dokter: " + fout.Message);
+                throw new Exception("Fout bij ophalen patiënten: " + fout.Message);
             }
             return patienten;
         }
 
-        // Zoekt patiënten waarvan de voor- of achternaam de zoekterm bevat
+        // Zoekt patiënten waarvan de voor- of achternaam de zoekterm bevat.
+        // Gebruikt dezelfde basistabel als GeefAllePatientenVanDokter: geen dokterfilter.
         public static List<Patient> Zoeken(string zoekterm)
         {
             List<Patient> patienten = new List<Patient>();
@@ -121,8 +121,10 @@ namespace DokterspraktijkLib.Models
                 using (SqlConnection verbinding = DatabaseHelper.GetConnection())
                 {
                     verbinding.Open();
-                    string sql = "SELECT id, voornaam, achternaam, geslacht, gsm, email, paswoord, geboortedatum, profielfotodata, notificaties " +
-                                 "FROM Patient WHERE voornaam LIKE @zoekterm OR achternaam LIKE @zoekterm " +
+                    string sql = "SELECT id, voornaam, achternaam, geslacht, gsm, email, " +
+                                 "paswoord, geboortedatum, profielfotodata, notificaties " +
+                                 "FROM Patient " +
+                                 "WHERE voornaam LIKE @zoekterm OR achternaam LIKE @zoekterm " +
                                  "ORDER BY achternaam, voornaam";
                     using (SqlCommand opdracht = new SqlCommand(sql, verbinding))
                     {
